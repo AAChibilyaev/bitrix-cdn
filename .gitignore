@@ -1,0 +1,19 @@
+# Автор: AAChibilyaev <info@aachibilyaev.com>
+# Файлы и каталоги, игнорируемые Git
+# Файл переменных окружения
+.env
+
+# Логи Nginx
+logs/
+nginx/logs/ 
+
+# Резервные копии
+backups/
+
+# Системные файлы macOS и Windows
+.DS_Store
+# SSL certificates и приватные ключи
+nginx/ssl/
+# Let's Encrypt hooks
+nginx/ssl/renewal-hooks/
+Thumbs.db

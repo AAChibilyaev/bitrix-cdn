@@ -1,0 +1,80 @@
+# Автор: AAChibilyaev <info@aachibilyaev.com>
+# Docker Compose для развертывания CDN на aac.local
+version: '3.8'
+
+# Docker Compose для запуска CDN: Nginx, MinIO и Certbot.
+services:
+  # Nginx: веб-сервер и SSL-терминация.
+  nginx:
+    build: ./nginx  # Сборка образа из каталога nginx (должен содержать Dockerfile)
+    container_name: cdn_nginx
+    env_file:
+      - .env       # Подгрузка переменных окружения из файла .env
+    ports:
+      - "80:80"    # HTTP
+      - "443:443"  # HTTPS
+    volumes:
+      # Шаблоны конфигурации Nginx: читаются для подстановки
+      - ./nginx/conf.d:/etc/nginx/templates:ro
+      # Монтируем writeable-директорию для итоговой конфигурации
+      - nginx-conf:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/letsencrypt         # SSL-сертификаты Let's Encrypt
+      - ./logs/nginx:/var/log/nginx          # Логи Nginx
+      - nginx-cache:/var/cache/nginx         # Кэш Nginx
+      - ./nginx/www:/var/www/certbot:ro      # Веб-корень для ACME (только чтение)
+    depends_on:
+      - minio  # Запускать после minio
+    restart: unless-stopped
+    networks:
+      - cdn-net
+
+  # MinIO: S3-совместимое объектное хранилище.
+  minio:
+    image: minio/minio:latest
+    container_name: cdn_minio
+    env_file:
+      - .env       # Подгрузка переменных окружения из файла .env
+    command: server /data --console-address ":9001"  # Запуск сервера и UI на порту 9001
+    volumes:
+      - minio-data:/data                     # Данные MinIO сохраняются в volume
+    ports:
+      - "9000:9000"  # API MinIO
+      - "9001:9001"  # Консоль управления MinIO
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s   # Интервал проверки
+      timeout: 20s    # Таймаут проверки
+      retries: 3      # Количество повторных попыток
+    restart: unless-stopped
+    networks:
+      - cdn-net
+
+  # Certbot: автоматическое получение и обновление SSL-сертификатов.
+  certbot:
+    image: certbot/certbot:latest
+    container_name: cdn_certbot
+    env_file:
+      - .env       # Подгрузка переменных окружения из файла .env
+    volumes:
+      - ./nginx/ssl:/etc/letsencrypt   # SSL-сертификаты Let's Encrypt
+      - ./nginx/www:/var/www/certbot   # Веб-корень для ACME
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h; done"
+    depends_on:
+      - nginx   # Запускать после nginx для корректной проверки ACME
+    restart: unless-stopped
+    networks:
+      - cdn-net
+
+# Определение томов для хранения данных.
+volumes:
+  minio-data:  # Том с данными MinIO
+    driver: local
+  nginx-cache: # Том с кэшем Nginx
+    driver: local
+  nginx-conf:  # Том для итоговой конфигурации Nginx
+    driver: local
+
+# Определение сети для взаимодействия сервисов.
+networks:
+  cdn-net:     # Сеть для сервисов CDN
+    driver: bridge

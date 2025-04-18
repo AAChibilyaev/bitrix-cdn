@@ -1,4 +1,5 @@
-# Автор: AAChibilyaev <info@aachibilyaev.com>
+Автор - я  
+Сайт для примера: aac.local  
 # Dockerized CDN с MinIO, Nginx и Certbot
 
 Этот проект предоставляет решение для развёртывания самоподдерживаемой сети доставки контента (CDN) на основе Docker и Docker Compose. Используются:
@@ -34,7 +35,7 @@
 1. **Клонирование репозитория:**
    ```bash
    git clone <URL_репозитория>
-   cd cdn.termokit.ru
+   cd aac.local
    ```
 
 2. **Создание файла переменных окружения:**
@@ -50,7 +51,7 @@
      cp .env.example .env.prod
      mv .env.prod .env
      # В файле .env укажите:
-     # CDN_DOMAIN=cdn.termokit.ru
+     # CDN_DOMAIN=aac.local
      # SSL_EMAIL=info@aachibilyaev.com
      ```
    Обязательные переменные:  
