@@ -1,5 +1,5 @@
-Автор - я  
-Сайт для примера: aac.local  
+Автор: AAChibilyaev <info@aachibilyaev.com>  
+  
 # Мониторинг MinIO
 
 В этом документе описаны основные шаги по сбору и визуализации метрик MinIO с помощью Prometheus и Grafana.

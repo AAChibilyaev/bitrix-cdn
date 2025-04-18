@@ -1,5 +1,5 @@
-Автор - я  
-Сайт для примера: aac.local  
+Автор: AAChibilyaev <info@aachibilyaev.com>  
+  
 
 # Конфигурация сервисов
 

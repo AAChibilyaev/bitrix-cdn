@@ -1,5 +1,5 @@
-Автор - я  
-Сайт для примера: aac.local  
+Автор: AAChibilyaev <info@aachibilyaev.com>  
+  
 # Dockerized CDN с MinIO, Nginx и Certbot
 
 Этот проект предоставляет решение для развёртывания самоподдерживаемой сети доставки контента (CDN) на основе Docker и Docker Compose. Используются:
@@ -33,9 +33,9 @@
 ## Настройка
 
 1. **Клонирование репозитория:**
-   ```bash
-   git clone <URL_репозитория>
-   cd aac.local
+```bash
+git clone git@github.com:AAChibilyaev/bitrix-cdn.git
+cd bitrix-cdn
    ```
 
 2. **Создание файла переменных окружения:**

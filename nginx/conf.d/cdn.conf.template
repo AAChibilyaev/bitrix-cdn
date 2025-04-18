@@ -1,5 +1,5 @@
-Автор - я  
-Сайт для примера: aac.local  
+Автор: AAChibilyaev <info@aachibilyaev.com>  
+  
 # --- Nginx Cache Configuration ---
 # Определяет зону кэша CDN_CACHE в /var/cache/nginx/cdn.
 # levels=1:2: Двухуровневая иерархия директорий для файлов кэша.
