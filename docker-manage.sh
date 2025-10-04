@@ -50,7 +50,7 @@ check_requirements() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
+    if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
         echo -e "${RED}Docker Compose is not installed${NC}"
         exit 1
     fi

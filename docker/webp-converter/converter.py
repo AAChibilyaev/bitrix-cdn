@@ -352,34 +352,60 @@ class ConversionRequestHandler(BaseHTTPRequestHandler):
         """Handle resize_cache image conversion"""
         try:
             # resize_cache хранится локально
-            source_path = Path('/var/www/cdn/upload/resize_cache') / image_path.lstrip('/upload/resize_cache/')
-            
+            source_path = Path('/var/www/cdn') / image_path.lstrip('/')
+
             if not source_path.exists():
+                logger.error(f"Resize cache image not found: {source_path}")
                 self.send_error(404, "Resize cache image not found")
                 return
-            
+
             # Проверяем Accept header для WebP
             accept_header = self.headers.get('Accept', '')
             if 'image/webp' not in accept_header:
                 # Браузер не поддерживает WebP
                 self.serve_original_file(source_path)
                 return
-            
-            # Путь для WebP версии
+
+            # Путь для WebP версии (хранится рядом с оригиналом)
             webp_path = source_path.with_suffix(source_path.suffix + '.webp')
-            
+
             # Конвертируем если нужно
             if not webp_path.exists() or source_path.stat().st_mtime > webp_path.stat().st_mtime:
-                # Конвертируем в WebP
-                converted = self.converter.convert_image(source_path)
-                if converted:
-                    webp_path = converted
-            
+                # Конвертируем в WebP напрямую (не через convert_image, т.к. resize_cache не в SOURCE_DIR)
+                try:
+                    cmd = [
+                        'cwebp',
+                        '-q', str(QUALITY),
+                        str(source_path),
+                        '-o', str(webp_path)
+                    ]
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+
+                    if result.returncode == 0:
+                        logger.info(f"Converted resize_cache: {source_path} -> {webp_path}")
+                        self.converter.stats['converted'] += 1
+
+                        # Update Redis stats
+                        if redis_client:
+                            redis_client.set(f"webp:resize:{source_path}", str(webp_path))
+                    else:
+                        logger.error(f"Conversion failed: {result.stderr}")
+                        self.converter.stats['failed'] += 1
+                        webp_path = None
+                except subprocess.TimeoutExpired:
+                    logger.error(f"Conversion timeout: {source_path}")
+                    self.converter.stats['failed'] += 1
+                    webp_path = None
+                except Exception as conv_error:
+                    logger.error(f"Conversion exception: {conv_error}")
+                    self.converter.stats['failed'] += 1
+                    webp_path = None
+
             if webp_path and webp_path.exists():
                 self.serve_webp_file(webp_path)
             else:
                 self.serve_original_file(source_path)
-                
+
         except Exception as e:
             logger.error(f"Resize conversion error: {e}")
             self.send_error(500, "Conversion failed")

@@ -54,8 +54,6 @@ sshfs \
     -o cache=yes \
     -o kernel_cache \
     -o compression=no \
-    -o large_read \
-    -o big_writes \
     -o ServerAliveInterval=15 \
     -o ServerAliveCountMax=3 \
     -o reconnect \

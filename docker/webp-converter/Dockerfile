@@ -18,7 +18,7 @@ RUN apk add --no-cache \
     redis
 
 # Установка Python библиотек для продвинутой обработки
-RUN pip3 install --no-cache-dir \
+RUN pip3 install --no-cache-dir --break-system-packages \
     redis \
     Pillow \
     watchdog

@@ -27,21 +27,21 @@ services:
       # Конфигурация NGINX
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
-      
+
       # SSL сертификаты
       - ./docker/ssl:/etc/nginx/ssl:ro
       - ./docker/certbot/www:/var/www/certbot:ro
       - ./docker/certbot/conf:/etc/letsencrypt:ro
-      
-      # Примонтированные файлы Битрикс (read-only)
-      - bitrix-files:/mnt/bitrix:ro
-      
-      # resize_cache - хранится локально на CDN
-      - resize-cache:/var/www/cdn/upload/resize_cache
-      
+
+      # Bitrix files from host mount
+      - /mnt/bitrix-cdn:/mnt/bitrix:ro
+
+      # resize_cache - хранится локально на CDN (NFS для Bitrix)
+      - /var/www/cdn/upload/resize_cache:/var/www/cdn/upload/resize_cache
+
       # Кеш WebP файлов
       - webp-cache:/var/cache/webp
-      
+
       # Логи
       - ./logs/nginx:/var/log/nginx
     depends_on:
@@ -55,7 +55,7 @@ services:
 
   # Сервис конвертации изображений в WebP
   webp-converter:
-    build: 
+    build:
       context: ./docker/webp-converter
       dockerfile: Dockerfile
     container_name: cdn-webp-converter
@@ -63,15 +63,15 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      # Доступ к оригинальным файлам
-      - bitrix-files:/mnt/bitrix:ro
-      
-      # resize_cache directory
-      - resize-cache:/var/www/cdn/upload/resize_cache
-      
+      # Bitrix files from host mount
+      - /mnt/bitrix-cdn:/mnt/bitrix:ro
+
+      # resize_cache directory (shared via NFS to Bitrix)
+      - /var/www/cdn/upload/resize_cache:/var/www/cdn/upload/resize_cache
+
       # Кеш WebP
       - webp-cache:/var/cache/webp
-      
+
       # Логи
       - ./logs/converter:/var/log/converter
     environment:
@@ -108,11 +108,11 @@ services:
       - /dev/fuse
     volumes:
       # SSH ключи
-      - ./docker/ssh:/root/.ssh:ro
-      
-      # Точка монтирования
-      - bitrix-files:/mnt/bitrix:shared
-      
+      - ./docker/ssh:/root/.ssh
+
+      # Точка монтирования (shared volume)
+      - bitrix-mount:/mnt/bitrix
+
       # Логи
       - ./logs/sshfs:/var/log/sshfs
     environment:
@@ -165,7 +165,8 @@ services:
       - nginx
     networks:
       - cdn-network
-    command: ["-F", "-f", "/etc/varnish/default.vcl", "-a", ":80", "-s", "malloc,1G"]
+    entrypoint: []
+    command: ["varnishd", "-F", "-f", "/etc/varnish/default.vcl", "-a", ":80", "-s", "malloc,1G", "-p", "default_ttl=3600", "-p", "default_grace=3600"]
 
   # Prometheus для мониторинга
   prometheus:
@@ -283,10 +284,10 @@ services:
     pid: host
 
 volumes:
-  # Примонтированные файлы Битрикс (монтируется через SSHFS контейнер)
-  bitrix-files:
+  # Bitrix files mounted via SSHFS
+  bitrix-mount:
     driver: local
-  
+
   # resize_cache - хранится локально, монтируется на Битрикс сервер
   resize-cache:
     driver: local
