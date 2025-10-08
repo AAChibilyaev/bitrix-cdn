@@ -17,8 +17,8 @@
       "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
       "targets": [
         {
-          "expr": "nginx_http_requests_total{cdn=\"bitrix\"}",
-          "legendFormat": "Всего запросов"
+          "expr": "sum(rate(webp_images_converted_total{cdn=\"bitrix\"}[1h]))",
+          "legendFormat": "Всего конвертаций"
         }
       ],
       "fieldConfig": {

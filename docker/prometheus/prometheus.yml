@@ -18,15 +18,15 @@ rule_files:
 # Scrape configurations
 scrape_configs:
 
-  # NGINX monitoring
-  - job_name: 'nginx'
-    static_configs:
-      - targets: ['nginx-exporter:9113']
-        labels:
-          service: 'nginx'
-          cdn: 'bitrix'
-    scrape_interval: 5s
-    scrape_timeout: 5s
+  # NGINX monitoring - DISABLED (exporter issues)
+  # - job_name: 'nginx'
+  #   static_configs:
+  #     - targets: ['nginx-exporter:9113']
+  #       labels:
+  #         service: 'nginx'
+  #         cdn: 'bitrix'
+  #   scrape_interval: 5s
+  #   scrape_timeout: 5s
 
   # Redis monitoring через Redis Exporter
   - job_name: 'redis'
@@ -68,32 +68,32 @@ scrape_configs:
     scrape_interval: 5s
     scrape_timeout: 5s
 
-  # Grafana monitoring
-  - job_name: 'grafana'
-    static_configs:
-      - targets: ['grafana:3000']
-        labels:
-          service: 'grafana'
-          cdn: 'bitrix'
-    scrape_interval: 5s
-    scrape_timeout: 5s
+  # Grafana monitoring - DISABLED (no metrics endpoint)
+  # - job_name: 'grafana'
+  #   static_configs:
+  #     - targets: ['grafana:3000']
+  #       labels:
+  #         service: 'grafana'
+  #         cdn: 'bitrix'
+  #   scrape_interval: 5s
+  #   scrape_timeout: 5s
 
-  # AlertManager monitoring
-  - job_name: 'alertmanager'
-    static_configs:
-      - targets: ['alertmanager:9093']
-        labels:
-          service: 'alertmanager'
-          cdn: 'bitrix'
-    scrape_interval: 5s
-    scrape_timeout: 5s
+  # AlertManager monitoring - DISABLED (no metrics endpoint)
+  # - job_name: 'alertmanager'
+  #   static_configs:
+  #     - targets: ['alertmanager:9093']
+  #       labels:
+  #         service: 'alertmanager'
+  #         cdn: 'bitrix'
+  #   scrape_interval: 5s
+  #   scrape_timeout: 5s
 
-  # Memcached monitoring
-  - job_name: 'memcached'
-    static_configs:
-      - targets: ['memcached:11211']
-        labels:
-          service: 'memcached'
-          cdn: 'bitrix'
-    scrape_interval: 5s
-    scrape_timeout: 5s
+  # Memcached monitoring - DISABLED (no metrics endpoint)
+  # - job_name: 'memcached'
+  #   static_configs:
+  #     - targets: ['memcached:11211']
+  #       labels:
+  #         service: 'memcached'
+  #         cdn: 'bitrix'
+  #   scrape_interval: 5s
+  #   scrape_timeout: 5s

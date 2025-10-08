@@ -251,7 +251,7 @@ services:
     ports:
       - "127.0.0.1:9113:9113"
     command:
-      - -nginx.scrape-uri=http://cdn-nginx/nginx_status
+      - --nginx.scrape-uri=http://172.25.0.14:80/nginx_status
     depends_on:
       - nginx
     networks:

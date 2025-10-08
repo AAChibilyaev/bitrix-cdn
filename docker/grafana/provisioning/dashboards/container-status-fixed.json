@@ -1,0 +1,221 @@
+{
+  "id": null,
+  "title": "🐳 Статус контейнеров (ИСПРАВЛЕНО)",
+  "tags": ["docker", "containers", "status", "production", "русский", "исправлено"],
+  "style": "dark",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "🖼️ WebP Converter",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"webp-converter-async\",cdn=\"bitrix\"}",
+          "legendFormat": "WebP Converter"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "💾 Redis",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"redis\",cdn=\"bitrix\"}",
+          "legendFormat": "Redis"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "💻 Node Exporter",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"node\",cdn=\"bitrix\"}",
+          "legendFormat": "Node Exporter"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "📊 Prometheus",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"prometheus\",cdn=\"bitrix\"}",
+          "legendFormat": "Prometheus"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "📈 Общий статус сервисов",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "targets": [
+        {
+          "expr": "up{job=\"webp-converter-async\",cdn=\"bitrix\"}",
+          "legendFormat": "WebP Converter"
+        },
+        {
+          "expr": "up{job=\"redis\",cdn=\"bitrix\"}",
+          "legendFormat": "Redis"
+        },
+        {
+          "expr": "up{job=\"node\",cdn=\"bitrix\"}",
+          "legendFormat": "Node Exporter"
+        },
+        {
+          "expr": "up{job=\"prometheus\",cdn=\"bitrix\"}",
+          "legendFormat": "Prometheus"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "💾 Использование памяти",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "targets": [
+        {
+          "expr": "redis_memory_used_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Redis Memory"
+        },
+        {
+          "expr": "node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "System Available"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "⚡ Производительность",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "targets": [
+        {
+          "expr": "rate(webp_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP Conversions/min"
+        },
+        {
+          "expr": "rate(avif_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "AVIF Conversions/min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "❌ Ошибки",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "targets": [
+        {
+          "expr": "rate(webp_conversion_errors_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP Errors/min"
+        },
+        {
+          "expr": "rate(avif_conversion_errors_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "AVIF Errors/min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.1},
+              {"color": "red", "value": 1}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    }
+  ]
+}

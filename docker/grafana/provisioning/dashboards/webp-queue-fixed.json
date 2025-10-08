@@ -1,0 +1,260 @@
+{
+  "id": null,
+  "title": "🖼️ WebP очередь - Мониторинг (ИСПРАВЛЕНО)",
+  "tags": ["webp", "queue", "cdn", "production", "русский", "исправлено"],
+  "style": "dark",
+  "timezone": "browser",
+  "refresh": "5s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "📦 WebP Queue Size",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "webp_queue_size{cdn=\"bitrix\"}",
+          "legendFormat": "Queue Size"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 5000},
+              {"color": "red", "value": 8000}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "⚡ Conversion Rate",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {
+          "expr": "rate(webp_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "Images/min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "❌ Total Errors",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "webp_conversion_errors_total{cdn=\"bitrix\"}",
+          "legendFormat": "Total Errors"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "red", "value": 10}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "📈 Compression Ratio",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {
+          "expr": "webp_compression_ratio{cdn=\"bitrix\"}",
+          "legendFormat": "Compression %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "📊 Conversion Timeline",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "targets": [
+        {
+          "expr": "rate(webp_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP Images/min"
+        },
+        {
+          "expr": "rate(avif_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "AVIF Images/min"
+        },
+        {
+          "expr": "rate(webp_images_skipped_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "Skipped/min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "❌ Error Rate Timeline",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "targets": [
+        {
+          "expr": "rate(webp_conversion_errors_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP Errors/min"
+        },
+        {
+          "expr": "rate(avif_conversion_errors_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "AVIF Errors/min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.1},
+              {"color": "red", "value": 1}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "📏 File Size Analysis",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "targets": [
+        {
+          "expr": "webp_original_size_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Original Size"
+        },
+        {
+          "expr": "webp_webp_size_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "WebP Size"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "⏱️ Conversion Duration",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "targets": [
+        {
+          "expr": "webp_conversion_duration_seconds{cdn=\"bitrix\"}",
+          "legendFormat": "WebP Duration"
+        },
+        {
+          "expr": "avif_conversion_duration_seconds{cdn=\"bitrix\"}",
+          "legendFormat": "AVIF Duration"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "📊 AVIF Conversion Stats",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 22},
+      "targets": [
+        {
+          "expr": "avif_images_converted_total{cdn=\"bitrix\"}",
+          "legendFormat": "AVIF Converted"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "❌ AVIF Errors",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 22},
+      "targets": [
+        {
+          "expr": "avif_conversion_errors_total{cdn=\"bitrix\"}",
+          "legendFormat": "AVIF Errors"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "red", "value": 5}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "📈 AVIF Compression",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 22},
+      "targets": [
+        {
+          "expr": "avif_compression_ratio{cdn=\"bitrix\"}",
+          "legendFormat": "AVIF Compression %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "percent"
+        }
+      }
+    }
+  ]
+}
