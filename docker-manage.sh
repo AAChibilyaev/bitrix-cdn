@@ -341,13 +341,22 @@ main() {
     cache)
         echo -e "${BLUE}Cache Management${NC}"
         echo ""
-        echo "Available commands:"
-        echo "  redis-stats  - Redis cache statistics"
-        echo "  memcached-stats - Memcached statistics"
-        echo "  nginx-cache  - Nginx cache statistics"
-        echo "  clear-all    - Clear all caches"
-        echo ""
-        echo "Usage: ./docker-manage.sh cache [command]"
+        if [ -n "$2" ]; then
+            ./cache-manager.sh "$2"
+        else
+            echo "Available commands:"
+            echo "  redis-stats     - Redis cache statistics"
+            echo "  memcached-stats - Memcached statistics"
+            echo "  nginx-cache     - Nginx cache statistics"
+            echo "  clear-redis     - Clear Redis cache"
+            echo "  clear-memcached - Clear Memcached cache"
+            echo "  clear-nginx     - Clear Nginx cache"
+            echo "  clear-all       - Clear all caches"
+            echo "  warm            - Warm up caches"
+            echo "  optimize        - Optimize cache settings"
+            echo ""
+            echo "Usage: ./docker-manage.sh cache [command]"
+        fi
         ;;
     help|*)
         print_help
