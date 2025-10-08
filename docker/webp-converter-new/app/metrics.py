@@ -56,6 +56,23 @@ class Metrics:
             'Current compression ratio (percentage saved)'
         )
 
+        # AVIF metrics
+        self.avif_images_converted = Counter(
+            'avif_images_converted_total',
+            'Total number of images converted to AVIF'
+        )
+
+        self.avif_conversion_errors = Counter(
+            'avif_conversion_errors_total',
+            'Total number of AVIF conversion errors'
+        )
+
+        self.avif_conversion_duration = Histogram(
+            'avif_conversion_duration_seconds',
+            'Time spent converting images to AVIF',
+            buckets=(0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0)
+        )
+
 # Global metrics instance
 metrics = Metrics()
 

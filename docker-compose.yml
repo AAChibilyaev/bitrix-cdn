@@ -16,6 +16,12 @@ services:
     read_only: true
     tmpfs:
       - /var/run
+      - /tmp/nginx_cache:size=2g,noexec,nosuid,nodev
+      - /var/cache/nginx:size=1g,noexec,nosuid,nodev
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
     healthcheck:
       test: ["CMD", "sh", "-c", "ps aux | grep 'nginx: master process' | grep -v grep || exit 1"]
       interval: 30s
@@ -157,9 +163,25 @@ services:
       - redis-data:/data
     networks:
       - cdn-network
-    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    command: redis-server --maxmemory 2gb --maxmemory-policy allkeys-lru --appendonly no --save "" --tcp-keepalive 60 --timeout 300 --hz 100 --dynamic-hz yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Memcached для дополнительного кеширования в RAM
+  memcached:
+    image: memcached:1.6-alpine
+    container_name: cdn-memcached
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11211:11211"
+    networks:
+      - cdn-network
+    command: memcached -m 1024 -I 1m -c 1024 -t 4 -R 200
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "11211"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -197,7 +219,7 @@ services:
 
       # UI настройки
       - GF_DEFAULT_INSTANCE_NAME=CDN Bitrix
-      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/cdn-complete.json
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/cdn-performance.json
 
       # Автообновление дашбордов
       - GF_DASHBOARDS_VERSIONS_TO_KEEP=5

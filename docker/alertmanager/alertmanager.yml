@@ -15,7 +15,10 @@ route:
 
 receivers:
   - name: 'default'
-    # Telegram настройки закомментированы - настройте .env файл
+    webhook_configs:
+      - url: 'http://localhost:8088/health'
+        send_resolved: true
+    # Telegram настройки - раскомментируйте и настройте .env файл
     # telegram_configs:
     #   - bot_token: '${TELEGRAM_BOT_TOKEN}'
     #     chat_id: '${TELEGRAM_CHAT_ID}'

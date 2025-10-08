@@ -30,7 +30,9 @@ scrape_configs:
       - targets: ['nginx-exporter:9113']
         labels:
           service: 'nginx'
-          cdn: 'termokit'
+          cdn: 'bitrix'
+    scrape_interval: 15s
+    scrape_timeout: 10s
 
   # Redis monitoring через Redis Exporter
   - job_name: 'redis'
@@ -38,7 +40,9 @@ scrape_configs:
       - targets: ['redis-exporter:9121']
         labels:
           service: 'redis'
-          cdn: 'termokit'
+          cdn: 'bitrix'
+    scrape_interval: 15s
+    scrape_timeout: 10s
 
   # Async WebP Converter с Prometheus метриками
   - job_name: 'webp-converter-async'
@@ -46,7 +50,7 @@ scrape_configs:
       - targets: ['webp-converter-async:9101']
         labels:
           service: 'webp-converter-async'
-          cdn: 'termokit'
+          cdn: 'bitrix'
     scrape_interval: 15s
     scrape_timeout: 10s
 
@@ -56,4 +60,4 @@ scrape_configs:
       - targets: ['node-exporter:9100']
         labels:
           service: 'system'
-          cdn: 'termokit'
+          cdn: 'bitrix'

@@ -33,6 +33,8 @@ print_help() {
     echo "  shell       - Open shell in container"
     echo "  clean       - Clean WebP/AVIF cache"
     echo "  stats       - Show cache statistics"
+    echo "  perf        - Performance monitoring"
+    echo "  cache       - Cache management"
     echo "  avif        - AVIF converter management"
     echo "  backup      - Backup configuration"
     echo "  restore     - Restore from backup"
@@ -330,12 +332,27 @@ main() {
             setup_ssl
             ;;
         avif)
-            avif_management
-            ;;
-        help|*)
-            print_help
-            ;;
-    esac
+        avif_management
+        ;;
+    perf)
+        echo -e "${BLUE}Running performance monitoring...${NC}"
+        ./performance-monitor.sh
+        ;;
+    cache)
+        echo -e "${BLUE}Cache Management${NC}"
+        echo ""
+        echo "Available commands:"
+        echo "  redis-stats  - Redis cache statistics"
+        echo "  memcached-stats - Memcached statistics"
+        echo "  nginx-cache  - Nginx cache statistics"
+        echo "  clear-all    - Clear all caches"
+        echo ""
+        echo "Usage: ./docker-manage.sh cache [command]"
+        ;;
+    help|*)
+        print_help
+        ;;
+esac
 }
 
 # Run
