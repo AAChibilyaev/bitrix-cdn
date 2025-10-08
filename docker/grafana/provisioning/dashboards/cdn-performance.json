@@ -1,7 +1,6 @@
 {
-  "dashboard": {
-    "id": null,
-    "title": "Bitrix CDN Performance Dashboard",
+  "id": null,
+  "title": "Bitrix CDN Performance Dashboard",
     "tags": ["cdn", "bitrix", "performance"],
     "style": "dark",
     "timezone": "browser",
@@ -10,7 +9,7 @@
       "from": "now-1h",
       "to": "now"
     },
-    "panels": [
+  "panels": [
       {
         "id": 1,
         "title": "CDN Performance Overview",
@@ -76,5 +75,4 @@
         ]
       }
     ]
-  }
 }

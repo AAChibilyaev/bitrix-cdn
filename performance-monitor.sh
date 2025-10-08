@@ -66,6 +66,15 @@ check_service() {
                 return 1
             fi
             ;;
+        "webp-converter")
+            if curl -s -f "http://localhost:$port/health" > /dev/null 2>&1; then
+                echo -e "${GREEN}✅ $name${NC} - Running on port $port"
+                return 0
+            else
+                echo -e "${RED}❌ $name${NC} - Not responding on port $port"
+                return 1
+            fi
+            ;;
         *)
             if curl -s -f "http://localhost:$port/health" > /dev/null 2>&1; then
                 echo -e "${GREEN}✅ $name${NC} - Running on port $port"
@@ -170,6 +179,7 @@ main() {
     check_service "nginx" "80" "Nginx Web Server"
     check_service "redis" "6379" "Redis Cache"
     check_service "memcached" "11211" "Memcached"
+    check_service "webp-converter" "8088" "WebP Converter"
     check_service "prometheus" "9090" "Prometheus"
     check_service "grafana" "3000" "Grafana"
     
