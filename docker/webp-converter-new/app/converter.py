@@ -185,11 +185,11 @@ class ImageConverter:
         avif_size = avif_path.stat().st_size
         compression_ratio = (1 - avif_size / original_size) * 100
 
-        metrics.images_converted.inc()
-        metrics.conversion_duration.observe(duration)
+        metrics.avif_images_converted.inc()
+        metrics.avif_conversion_duration.observe(duration)
         metrics.original_size.observe(original_size)
-        metrics.webp_size.observe(avif_size)  # Reuse webp_size metric for AVIF
-        metrics.compression_ratio.set(compression_ratio)
+        metrics.avif_size.observe(avif_size)
+        metrics.avif_compression_ratio.set(compression_ratio)
 
         logger.info("Image converted to AVIF",
                    worker_id=worker_id,
