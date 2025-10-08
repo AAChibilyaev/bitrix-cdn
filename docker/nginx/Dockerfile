@@ -7,12 +7,11 @@ FROM openresty/openresty:1.25.3.1-alpine
 RUN apk add --no-cache \
     curl \
     redis-tools \
-    memcached-tools \
     bc
 
 # Install Lua modules
 RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-redis
-RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-memcached
+# Memcached removed
 RUN /usr/local/openresty/luajit/bin/luarocks install lua-cjson
 
 # Create directories

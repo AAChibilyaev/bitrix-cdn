@@ -44,27 +44,7 @@ redis_stats() {
     echo "Operations per second: $ops"
 }
 
-# Memcached cache management
-memcached_stats() {
-    echo -e "\n${BLUE}📊 Memcached Cache Statistics${NC}"
-    echo "=================================="
-    
-    # Memcached stats
-    local memcached_stats=$(docker exec cdn-memcached memcached-tool localhost:11211 stats | head -20)
-    echo "$memcached_stats"
-    
-    # Memcached memory usage
-    local mem_usage=$(docker exec cdn-memcached memcached-tool localhost:11211 stats | grep "bytes" | head -1)
-    echo "Memory usage: $mem_usage"
-    
-    # Memcached hit rate
-    local hits=$(docker exec cdn-memcached memcached-tool localhost:11211 stats | grep "get_hits" | awk '{print $2}')
-    local misses=$(docker exec cdn-memcached memcached-tool localhost:11211 stats | grep "get_misses" | awk '{print $2}')
-    if [ "$hits" -gt 0 ] || [ "$misses" -gt 0 ]; then
-        local hit_rate=$(echo "scale=2; $hits * 100 / ($hits + $misses)" | bc -l 2>/dev/null || echo "0")
-        echo "Memcached hit rate: ${hit_rate}%"
-    fi
-}
+# Memcached removed - Redis is sufficient for caching
 
 # Nginx cache management
 nginx_cache_stats() {
@@ -91,12 +71,7 @@ clear_redis() {
     echo -e "${GREEN}✅ Redis cache cleared${NC}"
 }
 
-# Clear Memcached cache
-clear_memcached() {
-    echo -e "\n${YELLOW}🗑️ Clearing Memcached cache...${NC}"
-    docker exec cdn-memcached memcached-tool localhost:11211 flush_all
-    echo -e "${GREEN}✅ Memcached cache cleared${NC}"
-}
+# Memcached removed - Redis is sufficient for caching
 
 # Clear Nginx cache
 clear_nginx() {
@@ -109,7 +84,7 @@ clear_nginx() {
 clear_all() {
     echo -e "\n${YELLOW}🗑️ Clearing all caches...${NC}"
     clear_redis
-    clear_memcached
+    # Memcached removed
     clear_nginx
     echo -e "${GREEN}✅ All caches cleared${NC}"
 }
@@ -144,9 +119,7 @@ optimize_cache() {
     docker exec cdn-redis redis-cli config set maxmemory-policy allkeys-lru
     docker exec cdn-redis redis-cli config set save ""
     
-    # Memcached optimization
-    echo "Optimizing Memcached..."
-    # Memcached is already optimized in docker-compose.yml
+    # Memcached removed - Redis is sufficient for caching
     
     # Nginx optimization
     echo "Optimizing Nginx..."
@@ -161,47 +134,3 @@ main() {
         redis-stats)
             redis_stats
             ;;
-        memcached-stats)
-            memcached_stats
-            ;;
-        nginx-cache)
-            nginx_cache_stats
-            ;;
-        clear-redis)
-            clear_redis
-            ;;
-        clear-memcached)
-            clear_memcached
-            ;;
-        clear-nginx)
-            clear_nginx
-            ;;
-        clear-all)
-            clear_all
-            ;;
-        warm)
-            warm_cache
-            ;;
-        optimize)
-            optimize_cache
-            ;;
-        *)
-            echo "Usage: $0 {redis-stats|memcached-stats|nginx-cache|clear-redis|clear-memcached|clear-nginx|clear-all|warm|optimize}"
-            echo ""
-            echo "Commands:"
-            echo "  redis-stats     - Show Redis cache statistics"
-            echo "  memcached-stats - Show Memcached cache statistics"
-            echo "  nginx-cache     - Show Nginx cache statistics"
-            echo "  clear-redis     - Clear Redis cache"
-            echo "  clear-memcached - Clear Memcached cache"
-            echo "  clear-nginx     - Clear Nginx cache"
-            echo "  clear-all       - Clear all caches"
-            echo "  warm            - Warm up caches"
-            echo "  optimize        - Optimize cache settings"
-            exit 1
-            ;;
-    esac
-}
-
-# Run
-main "$@"

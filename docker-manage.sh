@@ -346,10 +346,10 @@ main() {
         else
             echo "Available commands:"
             echo "  redis-stats     - Redis cache statistics"
-            echo "  memcached-stats - Memcached statistics"
+            # Memcached removed
             echo "  nginx-cache     - Nginx cache statistics"
             echo "  clear-redis     - Clear Redis cache"
-            echo "  clear-memcached - Clear Memcached cache"
+            # Memcached removed
             echo "  clear-nginx     - Clear Nginx cache"
             echo "  clear-all       - Clear all caches"
             echo "  warm            - Warm up caches"

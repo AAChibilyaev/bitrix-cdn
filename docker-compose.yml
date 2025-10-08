@@ -166,21 +166,21 @@ services:
       timeout: 3s
       retries: 3
 
-  # Memcached для дополнительного кеширования в RAM
-  memcached:
-    image: memcached:1.6-alpine
-    container_name: cdn-memcached
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:11211:11211"
-    networks:
-      - cdn-network
-    command: memcached -m 1024 -I 1m -c 1024 -t 4 -R 200
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "11211"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
+  # Memcached REMOVED - Redis is sufficient for caching
+  # memcached:
+  #   image: memcached:1.6-alpine
+  #   container_name: cdn-memcached
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:11211:11211"
+  #   networks:
+  #     - cdn-network
+  #   command: memcached -m 1024 -I 1m -c 1024 -t 4 -R 200
+  #   healthcheck:
+  #     test: ["CMD", "nc", "-z", "localhost", "11211"]
+  #     interval: 30s
+  #     timeout: 3s
+  #     retries: 3
 
   # Prometheus для мониторинга
   prometheus:

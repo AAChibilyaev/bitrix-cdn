@@ -39,15 +39,7 @@ check_service() {
                 return 1
             fi
             ;;
-        "memcached")
-            if docker exec cdn-memcached nc -z localhost 11211 > /dev/null 2>&1; then
-                echo -e "${GREEN}✅ $name${NC} - Running on port $port"
-                return 0
-            else
-                echo -e "${RED}❌ $name${NC} - Not responding on port $port"
-                return 1
-            fi
-            ;;
+        # Memcached removed
         "prometheus")
             if curl -s -f "http://localhost:$port/-/healthy" > /dev/null 2>&1; then
                 echo -e "${GREEN}✅ $name${NC} - Running on port $port"
@@ -126,14 +118,7 @@ get_redis_stats() {
     fi
 }
 
-get_memcached_stats() {
-    echo -e "\n${BLUE}📊 Memcached Performance Metrics${NC}"
-    echo "====================================="
-    
-    # Memcached stats
-    local memcached_stats=$(docker exec cdn-memcached memcached-tool localhost:11211 stats | head -10)
-    echo "$memcached_stats"
-}
+# Memcached removed - Redis is sufficient for caching
 
 get_system_stats() {
     echo -e "\n${BLUE}📊 System Performance Metrics${NC}"
@@ -178,7 +163,7 @@ main() {
     # Check all services
     check_service "nginx" "80" "Nginx Web Server"
     check_service "redis" "6379" "Redis Cache"
-    check_service "memcached" "11211" "Memcached"
+    # Memcached removed
     check_service "webp-converter" "8088" "WebP Converter"
     check_service "prometheus" "9090" "Prometheus"
     check_service "grafana" "3000" "Grafana"
@@ -186,7 +171,7 @@ main() {
     # Get performance metrics
     get_nginx_stats
     get_redis_stats
-    get_memcached_stats
+    # Memcached removed
     get_system_stats
     
     # Test cache performance
