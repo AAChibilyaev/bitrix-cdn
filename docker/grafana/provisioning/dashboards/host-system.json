@@ -1,0 +1,266 @@
+{
+  "id": null,
+  "title": "🖥️ Хост система - Мониторинг",
+  "tags": ["host", "system", "monitoring", "production", "русский"],
+  "style": "dark",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "💻 CPU Использование",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",cdn=\"bitrix\"}[5m])) * 100)",
+          "legendFormat": "CPU %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "red", "value": 90}
+            ]
+          },
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "💾 Память",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {
+          "expr": "node_memory_MemTotal_bytes{cdn=\"bitrix\"} - node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Использовано памяти"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 8000000000},
+              {"color": "red", "value": 12000000000}
+            ]
+          },
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "💿 Диск",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "node_filesystem_size_bytes{cdn=\"bitrix\"} - node_filesystem_free_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Использовано диска"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 50000000000},
+              {"color": "red", "value": 80000000000}
+            ]
+          },
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "🌐 Сеть",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_bytes_total{cdn=\"bitrix\"}[1m])",
+          "legendFormat": "Входящий трафик"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "Bps"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "📊 CPU График",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "targets": [
+        {
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",cdn=\"bitrix\"}[5m])) * 100)",
+          "legendFormat": "CPU %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "red", "value": 90}
+            ]
+          },
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "💾 Память График",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "targets": [
+        {
+          "expr": "node_memory_MemTotal_bytes{cdn=\"bitrix\"} - node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Использовано памяти"
+        },
+        {
+          "expr": "node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Доступно памяти"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "💿 Диск График",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "targets": [
+        {
+          "expr": "node_filesystem_size_bytes{cdn=\"bitrix\"} - node_filesystem_free_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Использовано диска"
+        },
+        {
+          "expr": "node_filesystem_free_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Свободно диска"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "🌐 Сеть График",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_bytes_total{cdn=\"bitrix\"}[1m])",
+          "legendFormat": "Входящий трафик"
+        },
+        {
+          "expr": "rate(node_network_transmit_bytes_total{cdn=\"bitrix\"}[1m])",
+          "legendFormat": "Исходящий трафик"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "Bps"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "🔥 Критические процессы",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 22},
+      "targets": [
+        {
+          "expr": "node_processes_running{cdn=\"bitrix\"}",
+          "legendFormat": "Запущенных процессов"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 200},
+              {"color": "red", "value": 500}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "📈 Загрузка системы",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 22},
+      "targets": [
+        {
+          "expr": "node_load1{cdn=\"bitrix\"}",
+          "legendFormat": "1-минутная загрузка"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 2},
+              {"color": "red", "value": 5}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "⏱️ Время работы",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 22},
+      "targets": [
+        {
+          "expr": "node_boot_time_seconds{cdn=\"bitrix\"}",
+          "legendFormat": "Время загрузки"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "s"
+        }
+      }
+    }
+  ]
+}

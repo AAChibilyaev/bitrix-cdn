@@ -1,425 +1,299 @@
 {
-  "annotations": {
-    "list": []
-  },
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 1,
   "id": null,
-  "links": [],
-  "liveNow": true,
+  "title": "🚀 Bitrix CDN - Полный мониторинг",
+  "tags": ["cdn", "complete", "monitoring", "production", "русский"],
+  "style": "dark",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
   "panels": [
     {
-      "datasource": "Prometheus",
+      "id": 1,
+      "title": "🌐 Статус Nginx",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"nginx\",cdn=\"bitrix\"}",
+          "legendFormat": "Nginx"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
           "mappings": [
-            {"options": {"0": {"text": "❌ DOWN", "color": "red"}, "1": {"text": "✅ UP", "color": "green"}}, "type": "value"}
-          ],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
         }
-      },
-      "gridPos": {"h": 6, "w": 24, "x": 0, "y": 0},
-      "id": 1,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "horizontal",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "text": {"titleSize": 16, "valueSize": 24},
-        "textMode": "value_and_name"
-      },
-      "targets": [
-        {"expr": "up{job=\"nginx\",cdn=\"bitrix\"}", "legendFormat": "🌐 NGINX", "refId": "A"},
-        {"expr": "up{job=\"redis\",cdn=\"bitrix\"}", "legendFormat": "💾 Redis", "refId": "B"},
-        {"expr": "up{job=\"webp-converter-async\",cdn=\"bitrix\"}", "legendFormat": "🖼️ WebP Converter", "refId": "C"},
-        {"expr": "up{job=\"node\",cdn=\"bitrix\"}", "legendFormat": "💻 Node Exporter", "refId": "D"}
-      ],
-      "title": "📊 СТАТУС СЕРВИСОВ",
-      "type": "stat"
+      }
     },
     {
-      "datasource": "Prometheus",
+      "id": 2,
+      "title": "💾 Статус Redis",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"redis\",cdn=\"bitrix\"}",
+          "legendFormat": "Redis"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "🖼️ Конвертер WebP",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"webp-converter-async\",cdn=\"bitrix\"}",
+          "legendFormat": "WebP Converter"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "💻 Система",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"node\",cdn=\"bitrix\"}",
+          "legendFormat": "Node Exporter"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "📊 Скорость запросов",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "targets": [
+        {
+          "expr": "rate(nginx_http_requests_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "Запросов/мин"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "palette-classic"},
-          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 30, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
           "unit": "short"
         }
-      },
-      "gridPos": {"h": 9, "w": 16, "x": 0, "y": 6},
-      "id": 2,
-      "options": {
-        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "right", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
-      },
+      }
+    },
+    {
+      "id": 6,
+      "title": "💾 Производительность кеша",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
       "targets": [
-        {"expr": "webp_queue_size", "legendFormat": "📦 В очереди", "refId": "A"},
-        {"expr": "rate(webp_images_converted_total[1m]) * 60", "legendFormat": "⚡ Обработано/мин", "refId": "B"}
+        {
+          "expr": "nginx_cache_hit_rate{cdn=\"bitrix\"}",
+          "legendFormat": "Попадания в кеш"
+        }
       ],
-      "title": "🖼️ WEBP КОНВЕРТЕР - ОЧЕРЕДЬ",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 500}, {"color": "orange", "value": 800}, {"color": "red", "value": 950}]},
-          "unit": "short"
-        }
-      },
-      "gridPos": {"h": 3, "w": 4, "x": 16, "y": 6},
-      "id": 3,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "horizontal",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "text": {"titleSize": 12, "valueSize": 28},
-        "textMode": "value_and_name"
-      },
-      "targets": [{"expr": "webp_queue_size", "refId": "A"}],
-      "title": "📦 Очередь",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]},
-          "unit": "short"
-        }
-      },
-      "gridPos": {"h": 3, "w": 4, "x": 20, "y": 6},
-      "id": 4,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "horizontal",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "text": {"titleSize": 12, "valueSize": 28},
-        "textMode": "value_and_name"
-      },
-      "targets": [{"expr": "webp_images_converted_total", "refId": "A"}],
-      "title": "✅ Обработано",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "decimals": 1,
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 50}, {"color": "green", "value": 70}]},
+          "color": {"mode": "palette-classic"},
           "unit": "percent"
         }
-      },
-      "gridPos": {"h": 3, "w": 4, "x": 16, "y": 9},
-      "id": 5,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "horizontal",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "text": {"titleSize": 12, "valueSize": 28},
-        "textMode": "value_and_name"
-      },
-      "targets": [{"expr": "webp_compression_ratio", "refId": "A"}],
-      "title": "🗜️ Сжатие",
-      "type": "stat"
+      }
     },
     {
-      "datasource": "Prometheus",
+      "id": 7,
+      "title": "🖼️ Обработка изображений",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "targets": [
+        {
+          "expr": "rate(webp_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP/мин"
+        },
+        {
+          "expr": "rate(avif_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "AVIF/мин"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "💻 Системные ресурсы",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "targets": [
+        {
+          "expr": "node_cpu_seconds_total{cdn=\"bitrix\"}",
+          "legendFormat": "Использование CPU"
+        },
+        {
+          "expr": "node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Доступная память"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "❌ Мониторинг ошибок",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22},
+      "targets": [
+        {
+          "expr": "rate(nginx_http_requests_total{status=~\"5..\",cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "5xx Ошибки/мин"
+        },
+        {
+          "expr": "rate(webp_conversion_errors_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP Ошибки/мин"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 10}, {"color": "red", "value": 50}]},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.1},
+              {"color": "red", "value": 1}
+            ]
+          },
           "unit": "short"
         }
-      },
-      "gridPos": {"h": 3, "w": 4, "x": 20, "y": 9},
-      "id": 6,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "horizontal",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "text": {"titleSize": 12, "valueSize": 28},
-        "textMode": "value_and_name"
-      },
-      "targets": [{"expr": "webp_conversion_errors_total", "refId": "A"}],
-      "title": "❌ Ошибок",
-      "type": "stat"
+      }
     },
     {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "palette-classic"},
-          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-          "unit": "short"
-        }
-      },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 15},
-      "id": 7,
-      "options": {
-        "legend": {"calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
-      },
+      "id": 10,
+      "title": "📈 Статус очереди",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22},
       "targets": [
-        {"expr": "rate(webp_images_converted_total[1m]) * 60", "legendFormat": "Конвертировано", "refId": "A"},
-        {"expr": "rate(webp_images_skipped_total[1m]) * 60", "legendFormat": "Пропущено", "refId": "B"},
-        {"expr": "rate(webp_conversion_errors_total[1m]) * 60", "legendFormat": "Ошибок", "refId": "C"}
+        {
+          "expr": "webp_queue_size{cdn=\"bitrix\"}",
+          "legendFormat": "Размер очереди WebP"
+        }
       ],
-      "title": "⚡ СКОРОСТЬ ОБРАБОТКИ (файлов/мин)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"},
-          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 5000},
+              {"color": "red", "value": 8000}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "⏱️ Время отклика",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30},
+      "targets": [
+        {
+          "expr": "nginx_http_request_duration_seconds{cdn=\"bitrix\"}",
+          "legendFormat": "Время отклика"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.5},
+              {"color": "red", "value": 2}
+            ]
+          },
           "unit": "s"
         }
-      },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 15},
-      "id": 8,
-      "options": {
-        "legend": {"calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "none"}
-      },
-      "targets": [
-        {"expr": "histogram_quantile(0.50, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p50 (медиана)", "refId": "A"},
-        {"expr": "histogram_quantile(0.95, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p95", "refId": "B"},
-        {"expr": "histogram_quantile(0.99, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p99", "refId": "C"}
-      ],
-      "title": "⏱️ ВРЕМЯ КОНВЕРТАЦИИ",
-      "type": "timeseries"
+      }
     },
     {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "palette-classic"},
-          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-          "unit": "reqps"
-        }
-      },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 23},
-      "id": 9,
-      "options": {
-        "legend": {"calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
-      },
-      "targets": [
-        {"expr": "rate(nginx_http_requests_total[5m])", "legendFormat": "HTTP Requests", "refId": "A"}
-      ],
-      "title": "🌐 NGINX - ЗАПРОСЫ",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "palette-classic"},
-          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-          "unit": "short"
-        }
-      },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 23},
-      "id": 10,
-      "options": {
-        "legend": {"calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "none"}
-      },
-      "targets": [
-        {"expr": "nginx_connections_active", "legendFormat": "Active", "refId": "A"},
-        {"expr": "nginx_connections_reading", "legendFormat": "Reading", "refId": "B"},
-        {"expr": "nginx_connections_writing", "legendFormat": "Writing", "refId": "C"},
-        {"expr": "nginx_connections_waiting", "legendFormat": "Waiting", "refId": "D"}
-      ],
-      "title": "🌐 NGINX - СОЕДИНЕНИЯ",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "palette-classic"},
-          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-          "unit": "decbytes"
-        }
-      },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 31},
-      "id": 11,
-      "options": {
-        "legend": {"calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "none"}
-      },
-      "targets": [
-        {"expr": "redis_memory_used_bytes", "legendFormat": "Used Memory", "refId": "A"},
-        {"expr": "redis_memory_max_bytes", "legendFormat": "Max Memory", "refId": "B"}
-      ],
-      "title": "💾 REDIS - ПАМЯТЬ",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "palette-classic"},
-          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-          "unit": "ops"
-        }
-      },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 31},
       "id": 12,
-      "options": {
-        "legend": {"calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
-      },
+      "title": "💾 Использование памяти",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
       "targets": [
-        {"expr": "rate(redis_commands_processed_total[5m])", "legendFormat": "Commands/sec", "refId": "A"}
+        {
+          "expr": "redis_memory_used_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Память Redis"
+        },
+        {
+          "expr": "node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Доступная память системы"
+        }
       ],
-      "title": "💾 REDIS - КОМАНДЫ",
-      "type": "timeseries"
-    },
-    {
-      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
-          "max": 100,
-          "min": 0,
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 60}, {"color": "red", "value": 80}]},
-          "unit": "percent"
+          "color": {"mode": "palette-classic"},
+          "unit": "bytes"
         }
-      },
-      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 39},
-      "id": 13,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {"titleSize": 14, "valueSize": 24}
-      },
-      "targets": [{"expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "refId": "A"}],
-      "title": "💻 CPU",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "max": 100,
-          "min": 0,
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 85}]},
-          "unit": "percent"
-        }
-      },
-      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 39},
-      "id": 14,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {"titleSize": 14, "valueSize": 24}
-      },
-      "targets": [{"expr": "100 * (1 - ((node_memory_MemAvailable_bytes) / (node_memory_MemTotal_bytes)))", "refId": "A"}],
-      "title": "🧠 ПАМЯТЬ",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "max": 100,
-          "min": 0,
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]},
-          "unit": "percent"
-        }
-      },
-      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 39},
-      "id": 15,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {"titleSize": 14, "valueSize": 24}
-      },
-      "targets": [{"expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"rootfs\"})", "refId": "A"}],
-      "title": "💾 ДИСК",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "decimals": 2,
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-          "unit": "short"
-        }
-      },
-      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 39},
-      "id": 16,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-        "text": {"titleSize": 14, "valueSize": 24},
-        "textMode": "value_and_name"
-      },
-      "targets": [{"expr": "node_load1", "legendFormat": "Load 1m", "refId": "A"}],
-      "title": "⚙️ НАГРУЗКА",
-      "type": "stat"
+      }
     }
-  ],
-  "refresh": "5s",
-  "schemaVersion": 38,
-  "style": "dark",
-  "tags": ["cdn", "webp", "monitoring"],
-  "templating": {"list": []},
-  "time": {"from": "now-15m", "to": "now"},
-  "timepicker": {},
-  "timezone": "",
-  "title": "🚀 CDN Bitrix - Полный мониторинг",
-  "uid": "cdn-complete",
-  "version": 0,
-  "weekStart": ""
+  ]
 }

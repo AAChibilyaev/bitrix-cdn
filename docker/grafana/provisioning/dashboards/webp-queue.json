@@ -1,7 +1,7 @@
 {
   "id": null,
-  "title": "WebP Queue Dashboard",
-  "tags": ["webp", "queue", "cdn"],
+  "title": "🖼️ WebP очередь - Мониторинг",
+  "tags": ["webp", "queue", "cdn", "production", "русский"],
   "style": "dark",
   "timezone": "browser",
   "refresh": "5s",

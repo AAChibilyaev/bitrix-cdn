@@ -1,10 +1,10 @@
 {
   "id": null,
-  "title": "Bitrix CDN Performance Dashboard",
-  "tags": ["cdn", "bitrix", "performance"],
+  "title": "🚀 Bitrix CDN - Производительность",
+  "tags": ["cdn", "bitrix", "performance", "production", "русский"],
   "style": "dark",
   "timezone": "browser",
-  "refresh": "5s",
+  "refresh": "10s",
   "time": {
     "from": "now-1h",
     "to": "now"
@@ -12,67 +12,223 @@
   "panels": [
     {
       "id": 1,
-      "title": "CDN Performance Overview",
+      "title": "🌐 Общий обзор CDN",
       "type": "stat",
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
       "targets": [
         {
           "expr": "nginx_http_requests_total{cdn=\"bitrix\"}",
-          "legendFormat": "Total Requests"
+          "legendFormat": "Всего запросов"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "palette-classic"},
-          "custom": {
-            "hideFrom": {"legend": false, "tooltip": false, "vis": false}
-          }
+          "unit": "short",
+          "displayName": "Запросы"
         }
       }
     },
     {
       "id": 2,
-      "title": "Redis Cache Performance",
-      "type": "graph",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "title": "⚡ Скорость запросов",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
       "targets": [
         {
-          "expr": "redis_memory_used_bytes{cdn=\"bitrix\"}",
-          "legendFormat": "Memory Used"
-        },
-        {
-          "expr": "redis_keys_total{cdn=\"bitrix\"}",
-          "legendFormat": "Total Keys"
+          "expr": "rate(nginx_http_requests_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "Запросов/мин"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short",
+          "displayName": "RPS"
+        }
+      }
     },
     {
       "id": 3,
-      "title": "Nginx Cache Hit Rate",
-      "type": "graph",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "title": "📊 Эффективность кеша",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
       "targets": [
         {
           "expr": "nginx_cache_hit_rate{cdn=\"bitrix\"}",
-          "legendFormat": "Cache Hit Rate"
+          "legendFormat": "Попадания в кеш %"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 50},
+              {"color": "green", "value": 80}
+            ]
+          },
+          "unit": "percent",
+          "displayName": "Cache Hit Rate"
+        }
+      }
     },
     {
       "id": 4,
-      "title": "System Resources",
-      "type": "graph",
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+      "title": "💾 Память Redis",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {
+          "expr": "redis_memory_used_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Использовано памяти"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1000000000},
+              {"color": "red", "value": 2000000000}
+            ]
+          },
+          "unit": "bytes",
+          "displayName": "Redis Memory"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "📈 Динамика запросов",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "targets": [
+        {
+          "expr": "rate(nginx_http_requests_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "Запросов/мин"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "💾 Производительность кеша",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "targets": [
+        {
+          "expr": "nginx_cache_hit_rate{cdn=\"bitrix\"}",
+          "legendFormat": "Попадания в кеш"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "🖼️ Обработка изображений",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "targets": [
+        {
+          "expr": "rate(webp_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP/мин"
+        },
+        {
+          "expr": "rate(avif_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "AVIF/мин"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "💻 Системные ресурсы",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
       "targets": [
         {
           "expr": "node_cpu_seconds_total{cdn=\"bitrix\"}",
-          "legendFormat": "CPU Usage"
+          "legendFormat": "Использование CPU"
         },
         {
           "expr": "node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
-          "legendFormat": "Available Memory"
+          "legendFormat": "Доступная память"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "⏱️ Время отклика",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22},
+      "targets": [
+        {
+          "expr": "nginx_http_request_duration_seconds{cdn=\"bitrix\"}",
+          "legendFormat": "Время отклика"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.5},
+              {"color": "red", "value": 2}
+            ]
+          },
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "📊 Статус очереди",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22},
+      "targets": [
+        {
+          "expr": "webp_queue_size{cdn=\"bitrix\"}",
+          "legendFormat": "Размер очереди WebP"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 5000},
+              {"color": "red", "value": 8000}
+            ]
+          },
+          "unit": "short"
+        }
+      }
     }
   ]
 }

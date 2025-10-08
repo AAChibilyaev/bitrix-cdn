@@ -1,0 +1,329 @@
+{
+  "id": null,
+  "title": "🐳 Docker контейнеры - Мониторинг",
+  "tags": ["docker", "containers", "monitoring", "production", "русский"],
+  "style": "dark",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "🌐 Nginx контейнер",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"nginx\",cdn=\"bitrix\"}",
+          "legendFormat": "Nginx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "💾 Redis контейнер",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"redis\",cdn=\"bitrix\"}",
+          "legendFormat": "Redis"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "🖼️ WebP контейнер",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"webp-converter-async\",cdn=\"bitrix\"}",
+          "legendFormat": "WebP Converter"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "📊 Prometheus",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"prometheus\",cdn=\"bitrix\"}",
+          "legendFormat": "Prometheus"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "📈 Grafana",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 6},
+      "targets": [
+        {
+          "expr": "up{job=\"grafana\",cdn=\"bitrix\"}",
+          "legendFormat": "Grafana"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "💻 Node Exporter",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 6},
+      "targets": [
+        {
+          "expr": "up{job=\"node\",cdn=\"bitrix\"}",
+          "legendFormat": "Node Exporter"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "🚨 AlertManager",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 6},
+      "targets": [
+        {
+          "expr": "up{job=\"alertmanager\",cdn=\"bitrix\"}",
+          "legendFormat": "AlertManager"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "💾 Memcached",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 6},
+      "targets": [
+        {
+          "expr": "up{job=\"memcached\",cdn=\"bitrix\"}",
+          "legendFormat": "Memcached"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          },
+          "mappings": [
+            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
+          ]
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "📊 Общий статус контейнеров",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [
+        {
+          "expr": "up{job=\"nginx\",cdn=\"bitrix\"}",
+          "legendFormat": "Nginx"
+        },
+        {
+          "expr": "up{job=\"redis\",cdn=\"bitrix\"}",
+          "legendFormat": "Redis"
+        },
+        {
+          "expr": "up{job=\"webp-converter-async\",cdn=\"bitrix\"}",
+          "legendFormat": "WebP Converter"
+        },
+        {
+          "expr": "up{job=\"prometheus\",cdn=\"bitrix\"}",
+          "legendFormat": "Prometheus"
+        },
+        {
+          "expr": "up{job=\"grafana\",cdn=\"bitrix\"}",
+          "legendFormat": "Grafana"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "💾 Использование памяти контейнерами",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [
+        {
+          "expr": "redis_memory_used_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "Redis Memory"
+        },
+        {
+          "expr": "node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
+          "legendFormat": "System Available"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "⚡ Производительность контейнеров",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "targets": [
+        {
+          "expr": "rate(nginx_http_requests_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "Nginx Requests/min"
+        },
+        {
+          "expr": "rate(webp_images_converted_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP Conversions/min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "title": "❌ Ошибки контейнеров",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "targets": [
+        {
+          "expr": "rate(nginx_http_requests_total{status=~\"5..\",cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "Nginx 5xx Errors/min"
+        },
+        {
+          "expr": "rate(webp_conversion_errors_total{cdn=\"bitrix\"}[1m]) * 60",
+          "legendFormat": "WebP Errors/min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.1},
+              {"color": "red", "value": 1}
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    }
+  ]
+}
