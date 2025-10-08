@@ -16,7 +16,7 @@ route:
 receivers:
   - name: 'default'
     webhook_configs:
-      - url: 'http://localhost:8088/health'
+      - url: 'http://webp-converter-async:8088/health'
         send_resolved: true
     # Telegram настройки - раскомментируйте и настройте .env файл
     # telegram_configs:

@@ -27,9 +27,9 @@
         "tooltip": {"mode": "multi", "sort": "none"}
       },
       "targets": [
-        {"expr": "webp_queue_size", "legendFormat": "📦 В очереди", "refId": "A"},
-        {"expr": "rate(webp_images_converted_total[1m]) * 60", "legendFormat": "⚡ Обработано/мин", "refId": "B"},
-        {"expr": "webp_conversion_errors_total", "legendFormat": "❌ Всего ошибок", "refId": "C"}
+        {"expr": "webp_queue_size{cdn=\"bitrix\"}", "legendFormat": "📦 В очереди", "refId": "A"},
+        {"expr": "rate(webp_images_converted_total{cdn=\"bitrix\"}[1m]) * 60", "legendFormat": "⚡ Обработано/мин", "refId": "B"},
+        {"expr": "webp_conversion_errors_total{cdn=\"bitrix\"}", "legendFormat": "❌ Всего ошибок", "refId": "C"}
       ],
       "title": "📊 Очередь WebP конвертера в реальном времени",
       "type": "timeseries"

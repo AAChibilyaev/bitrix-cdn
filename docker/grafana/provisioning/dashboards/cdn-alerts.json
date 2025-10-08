@@ -51,10 +51,10 @@
         "textMode": "value_and_name"
       },
       "targets": [
-        {"expr": "up{job=\"nginx\"}", "legendFormat": "🌐 NGINX", "refId": "A"},
-        {"expr": "up{job=\"redis\"}", "legendFormat": "💾 Redis", "refId": "B"},
-        {"expr": "up{job=\"webp-converter-async\"}", "legendFormat": "🖼️ WebP", "refId": "C"},
-        {"expr": "up{job=\"node\"}", "legendFormat": "💻 System", "refId": "D"}
+        {"expr": "up{job=\"nginx\",cdn=\"bitrix\"}", "legendFormat": "🌐 NGINX", "refId": "A"},
+        {"expr": "up{job=\"redis\",cdn=\"bitrix\"}", "legendFormat": "💾 Redis", "refId": "B"},
+        {"expr": "up{job=\"webp-converter-async\",cdn=\"bitrix\"}", "legendFormat": "🖼️ WebP", "refId": "C"},
+        {"expr": "up{job=\"node\",cdn=\"bitrix\"}", "legendFormat": "💻 System", "refId": "D"}
       ],
       "title": "🚨 АЛЕРТЫ - Доступность сервисов",
       "type": "stat",

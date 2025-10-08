@@ -18,7 +18,7 @@
         "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
         "targets": [
           {
-            "expr": "nginx_http_requests_total",
+            "expr": "nginx_http_requests_total{cdn=\"bitrix\"}",
             "legendFormat": "Total Requests"
           }
         ],
@@ -38,11 +38,11 @@
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
         "targets": [
           {
-            "expr": "redis_memory_used_bytes",
+            "expr": "redis_memory_used_bytes{cdn=\"bitrix\"}",
             "legendFormat": "Memory Used"
           },
           {
-            "expr": "redis_keys_total",
+            "expr": "redis_keys_total{cdn=\"bitrix\"}",
             "legendFormat": "Total Keys"
           }
         ]
@@ -54,7 +54,7 @@
         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
         "targets": [
           {
-            "expr": "nginx_cache_hit_rate",
+            "expr": "nginx_cache_hit_rate{cdn=\"bitrix\"}",
             "legendFormat": "Cache Hit Rate"
           }
         ]
@@ -66,11 +66,11 @@
         "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
         "targets": [
           {
-            "expr": "node_cpu_seconds_total",
+            "expr": "node_cpu_seconds_total{cdn=\"bitrix\"}",
             "legendFormat": "CPU Usage"
           },
           {
-            "expr": "node_memory_MemAvailable_bytes",
+            "expr": "node_memory_MemAvailable_bytes{cdn=\"bitrix\"}",
             "legendFormat": "Available Memory"
           }
         ]

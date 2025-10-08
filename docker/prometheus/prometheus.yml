@@ -31,8 +31,8 @@ scrape_configs:
         labels:
           service: 'nginx'
           cdn: 'bitrix'
-    scrape_interval: 15s
-    scrape_timeout: 10s
+    scrape_interval: 5s
+    scrape_timeout: 5s
 
   # Redis monitoring через Redis Exporter
   - job_name: 'redis'
@@ -41,8 +41,8 @@ scrape_configs:
         labels:
           service: 'redis'
           cdn: 'bitrix'
-    scrape_interval: 15s
-    scrape_timeout: 10s
+    scrape_interval: 5s
+    scrape_timeout: 5s
 
   # Async WebP Converter с Prometheus метриками
   - job_name: 'webp-converter-async'
@@ -51,8 +51,8 @@ scrape_configs:
         labels:
           service: 'webp-converter-async'
           cdn: 'bitrix'
-    scrape_interval: 15s
-    scrape_timeout: 10s
+    scrape_interval: 5s
+    scrape_timeout: 5s
 
   # Node Exporter для системных метрик
   - job_name: 'node'
@@ -61,3 +61,5 @@ scrape_configs:
         labels:
           service: 'system'
           cdn: 'bitrix'
+    scrape_interval: 5s
+    scrape_timeout: 5s

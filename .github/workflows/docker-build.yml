@@ -20,20 +20,20 @@ jobs:
       run: cp .env.example .env
     
     - name: Build Docker images
-      run: docker-compose -f docker-compose.yml build
+      run: docker compose -f docker-compose.yml build
     
     - name: Run Docker containers
-      run: docker-compose -f docker-compose.yml up -d
+      run: docker compose -f docker-compose.yml up -d
     
     - name: Wait for services to start
       run: sleep 10
     
     - name: Check NGINX health
-      run: curl -f http://localhost:8080/health || exit 1
+      run: curl -f http://localhost:80/health || exit 1
     
     - name: Check NGINX status
-      run: curl -f http://localhost:8080/nginx_status || exit 1
+      run: curl -f http://localhost:80/nginx_status || exit 1
     
     - name: Stop containers
       if: always()
-      run: docker-compose -f docker-compose.yml down
+      run: docker compose -f docker-compose.yml down

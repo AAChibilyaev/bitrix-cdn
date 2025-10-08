@@ -3,11 +3,11 @@ apiVersion: 1
 providers:
   - name: 'Bitrix CDN Dashboards'
     orgId: 1
-    folder: ''
-    folderUid: ''
+    folder: 'CDN'
+    folderUid: 'cdn'
     type: file
     disableDeletion: false
-    updateIntervalSeconds: 30
+    updateIntervalSeconds: 10
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards
