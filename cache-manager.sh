@@ -134,3 +134,39 @@ main() {
         redis-stats)
             redis_stats
             ;;
+        nginx-cache)
+            nginx_cache_stats
+            ;;
+        clear-redis)
+            clear_redis
+            ;;
+        clear-nginx)
+            clear_nginx
+            ;;
+        clear-all)
+            clear_all
+            ;;
+        warm)
+            warm_cache
+            ;;
+        optimize)
+            optimize_cache
+            ;;
+        *)
+            echo "Usage: $0 {redis-stats|nginx-cache|clear-redis|clear-nginx|clear-all|warm|optimize}"
+            echo ""
+            echo "Commands:"
+            echo "  redis-stats     - Show Redis cache statistics"
+            echo "  nginx-cache     - Show Nginx cache statistics"
+            echo "  clear-redis      - Clear Redis cache"
+            echo "  clear-nginx     - Clear Nginx cache"
+            echo "  clear-all       - Clear all caches"
+            echo "  warm            - Warm up caches"
+            echo "  optimize        - Optimize cache settings"
+            exit 1
+            ;;
+    esac
+}
+
+# Run
+main "$@"

@@ -36,8 +36,8 @@ Bitrix CDN Server - это высокопроизводительная сист
 │  │                    NGINX + Lua                          │   │
 │  │                                                         │   │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │   │
-│  │  │   Redis     │  │ Memcached  │  │  Proxy Cache    │ │   │
-│  │  │  (2GB RAM)  │  │ (1GB RAM)  │  │  (500MB RAM)    │ │   │
+│  │  │   Redis     │  │            │  │  Proxy Cache    │ │   │
+│  │  │  (2GB RAM)  │  │            │  │  (500MB RAM)    │ │   │
 │  │  └─────────────┘  └─────────────┘  └─────────────────┘ │   │
 │  │                                                         │   │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │   │
@@ -67,10 +67,9 @@ Bitrix CDN Server - это высокопроизводительная сист
 
 ### 2. **Многоуровневое кеширование**
 ```
-1. Redis Cache (2GB RAM) - Primary
-2. Memcached Cache (1GB RAM) - Fallback  
-3. Nginx Proxy Cache (500MB RAM) - Final
-4. File System - Original
+1. Redis Cache (2GB RAM) - Primary cache
+2. Nginx Proxy Cache (500MB RAM) - Final cache
+3. File System - Original files
 ```
 
 ### 3. **Smart Content Negotiation**
@@ -98,10 +97,9 @@ Original Image → WebP Converter → AVIF Converter → Cache
 - **Общий**: 85%+
 
 ### **Память для кеширования**
-- **Redis**: 2GB RAM
-- **Memcached**: 1GB RAM  
-- **Nginx**: 500MB RAM
-- **Общий**: 3.5GB RAM
+- **Redis**: 2GB RAM (primary cache)
+- **Nginx**: 500MB RAM (proxy cache)
+- **Общий**: 2.5GB RAM
 
 ## 🛠️ Компоненты системы
 
@@ -117,11 +115,11 @@ Original Image → WebP Converter → AVIF Converter → Cache
 - **Персистентность**: отключена (только RAM)
 - **Подключения**: connection pooling
 
-### **3. Memcached Cache**
-- **Память**: 1GB RAM
-- **Оптимизация**: высокая конкурентность
-- **Fallback**: для Redis
-- **Протокол**: binary protocol
+### **3. Redis Cache (Primary)**
+- **Память**: 2GB RAM
+- **Оптимизация**: высокая производительность
+- **Политика**: allkeys-lru
+- **Протокол**: RESP (Redis Serialization Protocol)
 
 ### **4. WebP/AVIF Converter**
 - **Workers**: 12 асинхронных воркеров
