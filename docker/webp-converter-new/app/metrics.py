@@ -87,10 +87,10 @@ class MetricsServer:
     async def metrics_handler(self, request):
         """Serve Prometheus metrics"""
         metrics_output = generate_latest()
-        # generate_latest() возвращает bytes, декодируем в str
+        # generate_latest() возвращает bytes
         return web.Response(
-            text=metrics_output.decode('utf-8'),
-            content_type='text/plain; version=0.0.4; charset=utf-8'
+            body=metrics_output,
+            content_type='text/plain'
         )
 
     async def queue_status_handler(self, request):
