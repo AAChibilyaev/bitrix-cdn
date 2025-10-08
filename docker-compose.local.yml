@@ -17,31 +17,36 @@ services:
       - webp-cache:/var/cache/webp
       - ./logs/nginx:/var/log/nginx
     depends_on:
-      - webp-converter
+      - webp-converter-async
     networks:
       - cdn-network
     environment:
       - NGINX_HOST=localhost
 
-  # WebP Converter
-  webp-converter:
-    build: 
-      context: ./docker/webp-converter
+  # WebP Converter Async
+  webp-converter-async:
+    build:
+      context: ./docker/webp-converter-new
       dockerfile: Dockerfile
     container_name: cdn-webp-local
+    user: "33:33"
     volumes:
-      # Mount local test directory
-      - /tmp/test-upload:/mnt/bitrix:ro
-      - webp-cache:/var/cache/webp
-      - ./logs/converter:/var/log/converter
+      - /tmp/test-upload:/var/www/cdn/upload/resize_cache:rw
+      - ./docker/webp-converter-new/config.yml:/app/config.yml:ro
+      - webp-logs:/var/log/webp
     environment:
       - WEBP_QUALITY=${WEBP_QUALITY:-85}
-      - MAX_WIDTH=${WEBP_MAX_WIDTH:-2048}
-      - MAX_HEIGHT=${WEBP_MAX_HEIGHT:-2048}
-      - CACHE_DIR=/var/cache/webp
-      - SOURCE_DIR=/mnt/bitrix
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - WEBP_WORKER_THREADS=2
+      - WEBP_BATCH_SIZE=5
+      - WEBP_SCAN_INTERVAL=10
+      - WEBP_WATCH_DIR=/var/www/cdn/upload/resize_cache
+      - METRICS_PORT=9101
+      - HEALTH_PORT=8088
+      - LOG_LEVEL=DEBUG
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "127.0.0.1:9101:9101"
+      - "127.0.0.1:8088:8088"
     networks:
       - cdn-network
 
@@ -59,6 +64,8 @@ services:
 
 volumes:
   webp-cache:
+    driver: local
+  webp-logs:
     driver: local
   redis-data:
     driver: local

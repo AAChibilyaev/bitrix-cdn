@@ -1,0 +1,368 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "s"
+        }
+      },
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean", "min"], "displayMode": "table", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
+      "targets": [
+        {"expr": "histogram_quantile(0.50, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p50 - Половина файлов быстрее", "refId": "A"},
+        {"expr": "histogram_quantile(0.75, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p75", "refId": "B"},
+        {"expr": "histogram_quantile(0.90, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p90", "refId": "C"},
+        {"expr": "histogram_quantile(0.95, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p95", "refId": "D"},
+        {"expr": "histogram_quantile(0.99, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p99 - Самые медленные", "refId": "E"}
+      ],
+      "title": "⏱️ ПРОИЗВОДИТЕЛЬНОСТЬ - Время конвертации WebP (перцентили)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "decbytes"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 9},
+      "id": 2,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
+      "targets": [
+        {"expr": "rate(webp_original_size_bytes_sum[5m]) / rate(webp_original_size_bytes_count[5m])", "legendFormat": "Средний размер оригинала", "refId": "A"},
+        {"expr": "rate(webp_webp_size_bytes_sum[5m]) / rate(webp_webp_size_bytes_count[5m])", "legendFormat": "Средний размер WebP", "refId": "B"}
+      ],
+      "title": "📏 Размеры файлов - Оригинал vs WebP",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+      "id": 3,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "webp_compression_ratio", "legendFormat": "Экономия места (в процентах)", "refId": "A"}
+      ],
+      "title": "🗜️ Эффективность сжатия WebP",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "Bps"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 17},
+      "id": 4,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
+      "targets": [
+        {"expr": "rate(node_network_receive_bytes_total{device!=\"lo\"}[5m])", "legendFormat": "{{device}} - Входящий трафик", "refId": "A"},
+        {"expr": "rate(node_network_transmit_bytes_total{device!=\"lo\"}[5m])", "legendFormat": "{{device}} - Исходящий трафик", "refId": "B"}
+      ],
+      "title": "🌐 Сетевой трафик",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "Bps"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 17},
+      "id": 5,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
+      "targets": [
+        {"expr": "rate(node_disk_read_bytes_total[5m])", "legendFormat": "{{device}} - Чтение", "refId": "A"},
+        {"expr": "rate(node_disk_written_bytes_total[5m])", "legendFormat": "{{device}} - Запись", "refId": "B"}
+      ],
+      "title": "💿 Disk I/O",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 25},
+      "id": 6,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
+      "targets": [
+        {"expr": "100 - (avg by (cpu) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "legendFormat": "CPU {{cpu}}", "refId": "A"}
+      ],
+      "title": "💻 CPU Usage по ядрам",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "decbytes"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 25},
+      "id": 7,
+      "options": {
+        "legend": {"calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "node_memory_MemTotal_bytes", "legendFormat": "Всего памяти", "refId": "A"},
+        {"expr": "node_memory_MemAvailable_bytes", "legendFormat": "Доступно", "refId": "B"},
+        {"expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes", "legendFormat": "Используется", "refId": "C"},
+        {"expr": "node_memory_Cached_bytes", "legendFormat": "Кеш", "refId": "D"},
+        {"expr": "node_memory_Buffers_bytes", "legendFormat": "Буферы", "refId": "E"}
+      ],
+      "title": "🧠 Детальная статистика памяти",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.5},
+              {"color": "orange", "value": 2},
+              {"color": "red", "value": 4}
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 33},
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "text": {"titleSize": 14, "valueSize": 28},
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {"expr": "node_load1", "legendFormat": "Load Average 1m", "refId": "A"}
+      ],
+      "title": "⚙️ Нагрузка системы (1 мин)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.4},
+              {"color": "orange", "value": 1.5},
+              {"color": "red", "value": 3}
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 33},
+      "id": 9,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "text": {"titleSize": 14, "valueSize": 28},
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {"expr": "node_load5", "legendFormat": "Load Average 5m", "refId": "A"}
+      ],
+      "title": "⚙️ Нагрузка системы (5 мин)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.3},
+              {"color": "orange", "value": 1},
+              {"color": "red", "value": 2}
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 33},
+      "id": 10,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "text": {"titleSize": 14, "valueSize": 28},
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {"expr": "node_load15", "legendFormat": "Load Average 15m", "refId": "A"}
+      ],
+      "title": "⚙️ Нагрузка системы (15 мин)",
+      "type": "stat"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["performance", "cdn", "detailed"],
+  "templating": {"list": []},
+  "time": {"from": "now-30m", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "⚡ CDN - Производительность и Детальная диагностика",
+  "uid": "cdn-performance",
+  "version": 0,
+  "weekStart": ""
+}

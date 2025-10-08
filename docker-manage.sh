@@ -31,8 +31,9 @@ print_help() {
     echo "  logs        - Show logs (use -f for follow)"
     echo "  build       - Build custom images"
     echo "  shell       - Open shell in container"
-    echo "  clean       - Clean WebP cache"
+    echo "  clean       - Clean WebP/AVIF cache"
     echo "  stats       - Show cache statistics"
+    echo "  avif        - AVIF converter management"
     echo "  backup      - Backup configuration"
     echo "  restore     - Restore from backup"
     echo "  ssl         - Setup SSL certificates"
@@ -95,7 +96,7 @@ setup() {
 # Start services
 start_services() {
     echo -e "${BLUE}Starting CDN services...${NC}"
-    docker-compose -f "$COMPOSE_FILE" up -d
+    docker compose -f "$COMPOSE_FILE" up -d
     
     sleep 5
     show_status
@@ -104,13 +105,13 @@ start_services() {
 # Stop services
 stop_services() {
     echo -e "${BLUE}Stopping CDN services...${NC}"
-    docker-compose -f "$COMPOSE_FILE" down
+    docker compose -f "$COMPOSE_FILE" down
 }
 
 # Restart services
 restart_services() {
     echo -e "${BLUE}Restarting CDN services...${NC}"
-    docker-compose -f "$COMPOSE_FILE" restart
+    docker compose -f "$COMPOSE_FILE" restart
     
     sleep 5
     show_status
@@ -119,7 +120,7 @@ restart_services() {
 # Show status
 show_status() {
     echo -e "${BLUE}Service Status:${NC}"
-    docker-compose -f "$COMPOSE_FILE" ps
+    docker compose -f "$COMPOSE_FILE" ps
     
     echo ""
     echo -e "${BLUE}Health Checks:${NC}"
@@ -149,16 +150,16 @@ show_status() {
 # Show logs
 show_logs() {
     if [ "$1" = "-f" ]; then
-        docker-compose -f "$COMPOSE_FILE" logs -f
+        docker compose -f "$COMPOSE_FILE" logs -f
     else
-        docker-compose -f "$COMPOSE_FILE" logs --tail=50
+        docker compose -f "$COMPOSE_FILE" logs --tail=50
     fi
 }
 
 # Build images
 build_images() {
     echo -e "${BLUE}Building custom images...${NC}"
-    docker-compose -f "$COMPOSE_FILE" build
+    docker compose -f "$COMPOSE_FILE" build
 }
 
 # Open shell in container
@@ -171,8 +172,9 @@ open_shell() {
 # Clean cache
 # ИСПРАВЛЕНО: Clean cache с правильным container name
 clean_cache() {
-    echo -e "${BLUE}Cleaning WebP cache...${NC}"
+    echo -e "${BLUE}Cleaning WebP/AVIF cache...${NC}"
     docker exec cdn-webp-converter find /var/cache/webp -type f -name "*.webp" -mtime +7 -delete
+    docker exec cdn-webp-converter find /var/cache/webp -type f -name "*.avif" -mtime +7 -delete
     echo -e "${GREEN}Cache cleaned${NC}"
 }
 
@@ -183,6 +185,10 @@ show_stats() {
     # WebP files count
     local webp_count=$(docker exec cdn-webp-converter find /var/cache/webp -type f -name "*.webp" 2>/dev/null | wc -l)
     echo "WebP files: $webp_count"
+    
+    # AVIF files count
+    local avif_count=$(docker exec cdn-webp-converter find /var/cache/webp -type f -name "*.avif" 2>/dev/null | wc -l)
+    echo "AVIF files: $avif_count"
     
     # Cache size
     local cache_size=$(docker exec cdn-webp-converter du -sh /var/cache/webp 2>/dev/null | cut -f1)
@@ -234,6 +240,23 @@ setup_ssl() {
     
     echo -e "${GREEN}SSL certificate obtained${NC}"
     echo -e "${YELLOW}Uncomment SSL configuration in docker/nginx/conf.d/default.conf${NC}"
+}
+
+# AVIF management
+avif_management() {
+    echo -e "${BLUE}AVIF Converter Management${NC}"
+    echo ""
+    echo "Available commands:"
+    echo "  start       - Start AVIF converter"
+    echo "  stop        - Stop AVIF converter"
+    echo "  restart     - Restart AVIF converter"
+    echo "  logs        - Show converter logs"
+    echo "  stats       - Show conversion statistics"
+    echo "  test        - Test AVIF conversion"
+    echo "  enable-avif - Enable AVIF conversion"
+    echo "  disable-avif- Disable AVIF conversion"
+    echo ""
+    echo "Usage: ./avif-ctl.sh [command]"
 }
 
 # Main
@@ -305,6 +328,9 @@ main() {
             ;;
         ssl)
             setup_ssl
+            ;;
+        avif)
+            avif_management
             ;;
         help|*)
             print_help

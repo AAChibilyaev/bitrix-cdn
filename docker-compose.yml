@@ -16,9 +16,8 @@ services:
     read_only: true
     tmpfs:
       - /var/run
-      - /var/cache/nginx
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "sh", "-c", "ps aux | grep 'nginx: master process' | grep -v grep || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -27,6 +26,7 @@ services:
       # Конфигурация NGINX
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/html:/usr/share/nginx/html:ro
 
       # SSL сертификаты
       - ./docker/ssl:/etc/nginx/ssl:ro
@@ -41,11 +41,15 @@ services:
 
       # Кеш WebP файлов
       - webp-cache:/var/cache/webp
+      
+      # NGINX кеш для максимальной производительности
+      - nginx-cache:/var/cache/nginx
+      - nginx-tmp:/var/cache/nginx/tmp
 
       # Логи
       - ./logs/nginx:/var/log/nginx
     depends_on:
-      - webp-converter
+      - webp-converter-async
       - sshfs
     networks:
       - cdn-network
@@ -53,46 +57,56 @@ services:
       - NGINX_HOST=${CDN_DOMAIN}
       - NGINX_PORT=80
 
-  # Сервис конвертации изображений в WebP
-  webp-converter:
+  # Async WebP Converter - Production версия с watchdog и метриками
+  webp-converter-async:
     build:
-      context: ./docker/webp-converter
+      context: ./docker/webp-converter-new
       dockerfile: Dockerfile
-    container_name: cdn-webp-converter
+    container_name: cdn-webp-converter-async
     restart: unless-stopped
+    user: "33:33"  # www-data
     security_opt:
       - no-new-privileges:true
+    ports:
+      - "127.0.0.1:9101:9101"  # Prometheus metrics
+      - "127.0.0.1:8088:8088"  # Health check
     volumes:
-      # Bitrix files from host mount
-      - /mnt/bitrix-cdn:/mnt/bitrix:ro
-
-      # resize_cache directory (shared via NFS to Bitrix)
-      - /var/www/cdn/upload/resize_cache:/var/www/cdn/upload/resize_cache
-
-      # Кеш WebP
-      - webp-cache:/var/cache/webp
-
-      # Логи
-      - ./logs/converter:/var/log/converter
+      - /var/www/cdn/upload/resize_cache:/var/www/cdn/upload/resize_cache:rw
+      - ./docker/webp-converter-new/config.yml:/app/config.yml:ro
+      - webp-logs:/var/log/webp
     environment:
       - WEBP_QUALITY=${WEBP_QUALITY:-85}
-      - MAX_WIDTH=${WEBP_MAX_WIDTH:-2048}
-      - MAX_HEIGHT=${WEBP_MAX_HEIGHT:-2048}
-      - CACHE_DIR=/var/cache/webp
-      - SOURCE_DIR=/mnt/bitrix
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - WEBP_WORKER_THREADS=12
+      - WEBP_BATCH_SIZE=50
+      - WEBP_SCAN_INTERVAL=1
+      - WEBP_FORCE_RECONVERT=false
+      - WEBP_MIN_FILE_SIZE=10240
+      - WEBP_WATCH_DIR=/var/www/cdn/upload/resize_cache
+      - WEBP_EXTENSIONS=jpg,jpeg,png
+      - WEBP_MAX_QUEUE_SIZE=10000
+      - WEBP_RATE_LIMIT=500
+      - METRICS_PORT=9101
+      - HEALTH_PORT=8088
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     networks:
       - cdn-network
-    # Ограничение ресурсов для конвертера
+    depends_on:
+      - prometheus
     deploy:
       resources:
         limits:
+          cpus: '6'
+          memory: 6G
+        reservations:
           cpus: '2'
           memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
 
   # SSHFS монтирование файлов с сервера Битрикс
   sshfs:
@@ -150,24 +164,6 @@ services:
       timeout: 3s
       retries: 3
 
-  # Varnish для дополнительного кеширования (опционально)
-  varnish:
-    image: varnish:7.5-alpine
-    container_name: cdn-varnish
-    restart: unless-stopped
-    ports:
-      - "8080:80"
-    volumes:
-      - ./docker/varnish/default.vcl:/etc/varnish/default.vcl:ro
-    environment:
-      - VARNISH_SIZE=1G
-    depends_on:
-      - nginx
-    networks:
-      - cdn-network
-    entrypoint: []
-    command: ["varnishd", "-F", "-f", "/etc/varnish/default.vcl", "-a", ":80", "-s", "malloc,1G", "-p", "default_ttl=3600", "-p", "default_grace=3600"]
-
   # Prometheus для мониторинга
   prometheus:
     image: prom/prometheus:v2.53.2
@@ -198,6 +194,30 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - GF_INSTALL_PLUGINS=redis-datasource
+
+      # UI настройки
+      - GF_DEFAULT_INSTANCE_NAME=CDN Bitrix
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/cdn-complete.json
+
+      # Автообновление дашбордов
+      - GF_DASHBOARDS_VERSIONS_TO_KEEP=5
+      - GF_DASHBOARDS_MIN_REFRESH_INTERVAL=5s
+
+      # Улучшенная производительность
+      - GF_DATABASE_WAL=true
+      - GF_DATABASE_CACHE_MODE=shared
+
+      # Аналитика и метрики
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+
+      # Настройки отображения
+      - GF_USERS_DEFAULT_THEME=dark
+      - GF_DATE_FORMATS_DEFAULT_TIMEZONE=Europe/Moscow
+
+      # Логирование
+      - GF_LOG_LEVEL=info
+      - GF_LOG_MODE=console
     depends_on:
       - prometheus
     networks:
@@ -211,7 +231,7 @@ services:
     ports:
       - "127.0.0.1:9113:9113"
     command:
-      - -nginx.scrape-uri=http://nginx/nginx_status
+      - -nginx.scrape-uri=http://cdn-nginx/nginx_status
     depends_on:
       - nginx
     networks:
@@ -228,26 +248,6 @@ services:
     networks:
       - cdn-network
 
-  # Healthcheck сервис (закомментирован до создания Dockerfile)
-  # healthcheck:
-  #   build:
-  #     context: ./docker/healthcheck
-  #     dockerfile: Dockerfile
-  #   container_name: cdn-healthcheck
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./logs:/var/log/cdn:ro
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #   environment:
-  #     - ALERT_EMAIL=${ADMIN_EMAIL}
-  #     - CHECK_INTERVAL=300
-  #   networks:
-  #     - cdn-network
-  #   depends_on:
-  #     - nginx
-  #     - webp-converter
-  #     - sshfs
-  
   # Redis Exporter для мониторинга Redis
   redis-exporter:
     image: oliver006/redis_exporter:v1.55.0
@@ -283,6 +283,70 @@ services:
       - cdn-network
     pid: host
 
+  # Netdata - Real-time мониторинг
+  netdata:
+    image: netdata/netdata:v1.47.5
+    container_name: cdn-netdata
+    restart: unless-stopped
+    hostname: cdn.termokit.ru
+    ports:
+      - "127.0.0.1:19999:19999"
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdata-config:/etc/netdata
+      - netdata-lib:/var/lib/netdata
+      - netdata-cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/log:/host/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - NETDATA_CLAIM_TOKEN=${NETDATA_CLAIM_TOKEN:-}
+      - NETDATA_CLAIM_URL=https://app.netdata.cloud
+      - NETDATA_CLAIM_ROOMS=${NETDATA_CLAIM_ROOMS:-}
+    networks:
+      - cdn-network
+
+  # Uptime Kuma - Uptime мониторинг
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.15
+    container_name: cdn-uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - cdn-network
+
+  # Alertmanager - Алерты из Prometheus
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: cdn-alertmanager
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./docker/alertmanager:/etc/alertmanager
+      - alertmanager-data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - cdn-network
+    depends_on:
+      - prometheus
+
 volumes:
   # Bitrix files mounted via SSHFS
   bitrix-mount:
@@ -306,6 +370,32 @@ volumes:
   
   # Grafana данные
   grafana-data:
+    driver: local
+
+  # WebP Converter async logs
+  webp-logs:
+    driver: local
+
+  # Netdata volumes
+  netdata-config:
+    driver: local
+  netdata-lib:
+    driver: local
+  netdata-cache:
+    driver: local
+
+  # Uptime Kuma data
+  uptime-kuma-data:
+    driver: local
+
+  # Alertmanager data
+  alertmanager-data:
+    driver: local
+
+  # NGINX cache volumes for maximum performance
+  nginx-cache:
+    driver: local
+  nginx-tmp:
     driver: local
 
 networks:

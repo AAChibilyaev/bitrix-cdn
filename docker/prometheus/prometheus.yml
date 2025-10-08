@@ -9,7 +9,7 @@ global:
 alerting:
   alertmanagers:
     - static_configs:
-        - targets: []
+        - targets: ['cdn-alertmanager:9093']
 
 # Rule files
 rule_files:
@@ -40,22 +40,16 @@ scrape_configs:
           service: 'redis'
           cdn: 'termokit'
 
-  # Docker containers monitoring
-  - job_name: 'docker'
+  # Async WebP Converter с Prometheus метриками
+  - job_name: 'webp-converter-async'
     static_configs:
-      - targets: ['172.25.0.1:9323']  # Требует docker metrics exporter
+      - targets: ['webp-converter-async:9101']
         labels:
-          service: 'docker'
-
-  # ИСПРАВЛЕНО: WebP Converter HTTP API metrics
-  - job_name: 'webp-converter'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets: ['webp-converter:8080']
-        labels:
-          service: 'webp-converter'
+          service: 'webp-converter-async'
           cdn: 'termokit'
-  
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
   # Node Exporter для системных метрик
   - job_name: 'node'
     static_configs:

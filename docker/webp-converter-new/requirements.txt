@@ -1,0 +1,25 @@
+# Image processing
+Pillow==11.3.0
+pillow-heif==0.18.0
+
+# File system monitoring
+watchdog==4.0.2
+
+# Prometheus metrics
+prometheus-client==0.20.0
+
+# HTTP server for health checks
+aiohttp==3.10.5
+
+# Configuration
+pyyaml==6.0.2
+python-dotenv==1.0.1
+
+# Logging
+structlog==24.4.0
+
+# Utils
+click==8.1.7
+
+# Testing
+playwright==1.40.0

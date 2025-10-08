@@ -2,95 +2,62 @@ groups:
   - name: cdn_alerts
     interval: 30s
     rules:
-      # NGINX alerts
-      - alert: NginxDown
-        expr: up{job="nginx"} == 0
-        for: 1m
-        labels:
-          severity: critical
-          service: nginx
-        annotations:
-          summary: "NGINX is down"
-          description: "NGINX exporter cannot reach NGINX service for more than 1 minute."
-
-      - alert: NginxHighConnections
-        expr: nginx_connections_active > 1000
-        for: 5m
-        labels:
-          severity: warning
-          service: nginx
-        annotations:
-          summary: "High number of NGINX connections"
-          description: "NGINX has {{ $value }} active connections (threshold: 1000)."
-
-      - alert: NginxHighErrorRate
-        expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) > 0.05
-        for: 5m
-        labels:
-          severity: warning
-          service: nginx
-        annotations:
-          summary: "High error rate in NGINX"
-          description: "NGINX 5xx error rate is {{ $value | humanizePercentage }}."
-
-      # Redis alerts
-      - alert: RedisDown
-        expr: up{job="redis"} == 0
-        for: 1m
-        labels:
-          severity: warning
-          service: redis
-        annotations:
-          summary: "Redis is down"
-          description: "Redis instance is not accessible."
-
-      - alert: RedisHighMemory
-        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
-        for: 5m
-        labels:
-          severity: warning
-          service: redis
-        annotations:
-          summary: "Redis memory usage is high"
-          description: "Redis is using {{ $value | humanizePercentage }} of maximum memory."
-
-      # WebP Converter alerts
-      - alert: WebPConverterDown
-        expr: up{job="webp-converter"} == 0
+      # Сервисы недоступны
+      - alert: ServiceDown
+        expr: up == 0
         for: 2m
         labels:
           severity: critical
-          service: webp-converter
         annotations:
-          summary: "WebP converter is down"
-          description: "WebP converter service is not responding."
+          summary: "Сервис {{ $labels.job }} недоступен"
+          description: "Сервис {{ $labels.job }} на инстансе {{ $labels.instance }} не отвечает более 2 минут"
 
-      - alert: WebPConversionErrors
-        expr: rate(webp_conversion_errors_total[5m]) > 0.1
+      # WebP очередь переполнена
+      - alert: WebPQueueOverflow
+        expr: webp_queue_size > 900
         for: 5m
         labels:
           severity: warning
-          service: webp-converter
         annotations:
-          summary: "High WebP conversion error rate"
-          description: "WebP conversion error rate is {{ $value }} errors/sec."
+          summary: "WebP очередь переполнена"
+          description: "Размер очереди: {{ $value }} (максимум 1000)"
 
-      # Disk space alerts
-      - alert: DiskSpaceLow
-        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.1
+      # WebP очередь критична
+      - alert: WebPQueueCritical
+        expr: webp_queue_size >= 1000
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "WebP очередь ПОЛНАЯ!"
+          description: "Очередь заполнена ({{ $value }}/1000)"
+
+      # CPU высокая нагрузка
+      - alert: HighCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокая загрузка CPU"
+          description: "CPU: {{ $value | humanize }}%"
+
+      # Память критична
+      - alert: CriticalMemoryUsage
+        expr: 100 * (1 - ((node_memory_MemAvailable_bytes) / (node_memory_MemTotal_bytes))) > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Критическая память!"
+          description: "Memory: {{ $value | humanize }}%"
+
+      # Диск критичен
+      - alert: CriticalDiskUsage
+        expr: 100 - ((node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} * 100) / node_filesystem_size_bytes{mountpoint="/",fstype!="rootfs"}) > 90
         for: 5m
         labels:
           severity: critical
         annotations:
-          summary: "Low disk space"
-          description: "Less than 10% disk space remaining on root partition."
-
-      - alert: CacheSizeHigh
-        expr: webp_cache_size_bytes > 10737418240  # 10GB
-        for: 30m
-        labels:
-          severity: warning
-          service: cache
-        annotations:
-          summary: "WebP cache size is large"
-          description: "WebP cache size is {{ $value | humanize1024 }}B. Consider cleanup."
+          summary: "Диск заполнен!"
+          description: "Disk: {{ $value | humanize }}%"

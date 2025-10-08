@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  webp-converter:
+    build: .
+    ports:
+      - "8088:8088"  # Health check
+      - "9101:9101"  # Metrics
+    environment:
+      - WEBP_WATCH_DIR=/var/www/cdn/upload/resize_cache
+      - WEBP_QUALITY=85
+      - WEBP_WORKER_THREADS=2
+      - WEBP_MIN_FILE_SIZE=10240
+      - WEBP_EXTENSIONS=jpg,jpeg,png
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./test_images:/var/www/cdn/upload/resize_cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  test-runner:
+    image: mcr.microsoft.com/playwright/python:v1.40.0-focal
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: python test_playwright.py
+    depends_on:
+      - webp-converter
