@@ -8,14 +8,6 @@ datasources:
     isDefault: true
     editable: true
     jsonData:
-      timeInterval: "15s"
-
-  - name: Redis
-    type: redis-datasource
-    access: proxy
-    url: redis://redis:6379
-    editable: true
-    jsonData:
-      client: standalone
-      poolSize: 10
-      timeout: 10
+      httpMethod: POST
+      queryTimeout: 60s
+      timeInterval: 5s
