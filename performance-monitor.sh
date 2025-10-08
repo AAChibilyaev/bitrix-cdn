@@ -20,13 +20,62 @@ check_service() {
     local port=$2
     local name=$3
     
-    if curl -s -f "http://localhost:$port/health" > /dev/null 2>&1; then
-        echo -e "${GREEN}✅ $name${NC} - Running on port $port"
-        return 0
-    else
-        echo -e "${RED}❌ $name${NC} - Not responding on port $port"
-        return 1
-    fi
+    case $service in
+        "nginx")
+            if curl -s -f "http://localhost:$port/health" > /dev/null 2>&1; then
+                echo -e "${GREEN}✅ $name${NC} - Running on port $port"
+                return 0
+            else
+                echo -e "${RED}❌ $name${NC} - Not responding on port $port"
+                return 1
+            fi
+            ;;
+        "redis")
+            if docker exec cdn-redis redis-cli ping > /dev/null 2>&1; then
+                echo -e "${GREEN}✅ $name${NC} - Running on port $port"
+                return 0
+            else
+                echo -e "${RED}❌ $name${NC} - Not responding on port $port"
+                return 1
+            fi
+            ;;
+        "memcached")
+            if docker exec cdn-memcached nc -z localhost 11211 > /dev/null 2>&1; then
+                echo -e "${GREEN}✅ $name${NC} - Running on port $port"
+                return 0
+            else
+                echo -e "${RED}❌ $name${NC} - Not responding on port $port"
+                return 1
+            fi
+            ;;
+        "prometheus")
+            if curl -s -f "http://localhost:$port/-/healthy" > /dev/null 2>&1; then
+                echo -e "${GREEN}✅ $name${NC} - Running on port $port"
+                return 0
+            else
+                echo -e "${RED}❌ $name${NC} - Not responding on port $port"
+                return 1
+            fi
+            ;;
+        "grafana")
+            if curl -s -f "http://localhost:$port/api/health" > /dev/null 2>&1; then
+                echo -e "${GREEN}✅ $name${NC} - Running on port $port"
+                return 0
+            else
+                echo -e "${RED}❌ $name${NC} - Not responding on port $port"
+                return 1
+            fi
+            ;;
+        *)
+            if curl -s -f "http://localhost:$port/health" > /dev/null 2>&1; then
+                echo -e "${GREEN}✅ $name${NC} - Running on port $port"
+                return 0
+            else
+                echo -e "${RED}❌ $name${NC} - Not responding on port $port"
+                return 1
+            fi
+            ;;
+    esac
 }
 
 # Performance metrics
