@@ -1,0 +1,406 @@
+# Bitrix CDN Server - Production Configuration
+# Author: Chibilyaev Alexandr <info@aachibilyaev.com>
+# Company: AAChibilyaev LTD
+
+services:
+  # NGINX с модулем для обработки изображений
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: cdn-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/run
+    healthcheck:
+      test: ["CMD", "sh", "-c", "ps aux | grep 'nginx: master process' | grep -v grep || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Конфигурация NGINX
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/html:/usr/share/nginx/html:ro
+
+      # SSL сертификаты
+      - ./docker/ssl:/etc/nginx/ssl:ro
+      - ./docker/certbot/www:/var/www/certbot:ro
+      - ./docker/certbot/conf:/etc/letsencrypt:ro
+
+      # Bitrix files from host mount
+      - /mnt/bitrix-cdn:/mnt/bitrix:ro
+
+      # resize_cache - хранится локально на CDN (NFS для Bitrix)
+      - /var/www/cdn/upload/resize_cache:/var/www/cdn/upload/resize_cache
+
+      # Кеш WebP файлов
+      - webp-cache:/var/cache/webp
+      
+      # NGINX кеш для максимальной производительности
+      - nginx-cache:/var/cache/nginx
+      - nginx-tmp:/var/cache/nginx/tmp
+
+      # Логи
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - webp-converter-async
+      - sshfs
+    networks:
+      - cdn-network
+    environment:
+      - NGINX_HOST=${CDN_DOMAIN}
+      - NGINX_PORT=80
+
+  # Async WebP Converter - Production версия с watchdog и метриками
+  webp-converter-async:
+    build:
+      context: ./docker/webp-converter-new
+      dockerfile: Dockerfile
+    container_name: cdn-webp-converter-async
+    restart: unless-stopped
+    user: "33:33"  # www-data
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "127.0.0.1:9101:9101"  # Prometheus metrics
+      - "127.0.0.1:8088:8088"  # Health check
+    volumes:
+      - /var/www/cdn/upload/resize_cache:/var/www/cdn/upload/resize_cache:rw
+      - ./docker/webp-converter-new/config.yml:/app/config.yml:ro
+      - webp-logs:/var/log/webp
+    environment:
+      - WEBP_QUALITY=${WEBP_QUALITY:-85}
+      - WEBP_WORKER_THREADS=12
+      - WEBP_BATCH_SIZE=50
+      - WEBP_SCAN_INTERVAL=1
+      - WEBP_FORCE_RECONVERT=false
+      - WEBP_MIN_FILE_SIZE=10240
+      - WEBP_WATCH_DIR=/var/www/cdn/upload/resize_cache
+      - WEBP_EXTENSIONS=jpg,jpeg,png
+      - WEBP_MAX_QUEUE_SIZE=10000
+      - WEBP_RATE_LIMIT=500
+      - METRICS_PORT=9101
+      - HEALTH_PORT=8088
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - cdn-network
+    depends_on:
+      - prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: '6'
+          memory: 6G
+        reservations:
+          cpus: '2'
+          memory: 2G
+
+  # SSHFS монтирование файлов с сервера Битрикс
+  sshfs:
+    build:
+      context: ./docker/sshfs
+      dockerfile: Dockerfile
+    container_name: cdn-sshfs
+    restart: unless-stopped
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    volumes:
+      # SSH ключи
+      - ./docker/ssh:/root/.ssh
+
+      # Точка монтирования (shared volume)
+      - bitrix-mount:/mnt/bitrix
+
+      # Логи
+      - ./logs/sshfs:/var/log/sshfs
+    environment:
+      - REMOTE_HOST=${BITRIX_SERVER_IP}
+      - REMOTE_USER=${BITRIX_SERVER_USER}
+      - REMOTE_PATH=${BITRIX_UPLOAD_PATH}
+      - MOUNT_POINT=/mnt/bitrix
+      - SSH_KEY=/root/.ssh/bitrix_mount
+    networks:
+      - cdn-network
+    healthcheck:
+      test: ["CMD", "mountpoint", "-q", "/mnt/bitrix"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis для кеширования метаданных
+  redis:
+    image: redis:7.4-alpine
+    container_name: cdn-redis
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - cdn-network
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Prometheus для мониторинга
+  prometheus:
+    image: prom/prometheus:v2.53.2
+    container_name: cdn-prometheus
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./docker/prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - cdn-network
+
+  # Grafana для визуализации метрик
+  grafana:
+    image: grafana/grafana:11.2.2
+    container_name: cdn-grafana
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=redis-datasource
+
+      # UI настройки
+      - GF_DEFAULT_INSTANCE_NAME=CDN Bitrix
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/cdn-complete.json
+
+      # Автообновление дашбордов
+      - GF_DASHBOARDS_VERSIONS_TO_KEEP=5
+      - GF_DASHBOARDS_MIN_REFRESH_INTERVAL=5s
+
+      # Улучшенная производительность
+      - GF_DATABASE_WAL=true
+      - GF_DATABASE_CACHE_MODE=shared
+
+      # Аналитика и метрики
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+
+      # Настройки отображения
+      - GF_USERS_DEFAULT_THEME=dark
+      - GF_DATE_FORMATS_DEFAULT_TIMEZONE=Europe/Moscow
+
+      # Логирование
+      - GF_LOG_LEVEL=info
+      - GF_LOG_MODE=console
+    depends_on:
+      - prometheus
+    networks:
+      - cdn-network
+
+  # NGINX Exporter для метрик
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.3.0
+    container_name: cdn-nginx-exporter
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9113:9113"
+    command:
+      - -nginx.scrape-uri=http://cdn-nginx/nginx_status
+    depends_on:
+      - nginx
+    networks:
+      - cdn-network
+
+  # Certbot для SSL сертификатов
+  certbot:
+    image: certbot/certbot:v2.11.0
+    container_name: cdn-certbot
+    volumes:
+      - ./docker/certbot/conf:/etc/letsencrypt
+      - ./docker/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - cdn-network
+
+  # Redis Exporter для мониторинга Redis
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.55.0
+    container_name: cdn-redis-exporter
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    networks:
+      - cdn-network
+    depends_on:
+      - redis
+  
+  # Node Exporter для системных метрик
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: cdn-node-exporter
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9100:9100"
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/pods/.+)($|/)'
+    volumes:
+      - /:/host:ro,rslave
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    networks:
+      - cdn-network
+    pid: host
+
+  # Netdata - Real-time мониторинг
+  netdata:
+    image: netdata/netdata:v1.47.5
+    container_name: cdn-netdata
+    restart: unless-stopped
+    hostname: cdn.termokit.ru
+    ports:
+      - "127.0.0.1:19999:19999"
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdata-config:/etc/netdata
+      - netdata-lib:/var/lib/netdata
+      - netdata-cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/log:/host/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - NETDATA_CLAIM_TOKEN=${NETDATA_CLAIM_TOKEN:-}
+      - NETDATA_CLAIM_URL=https://app.netdata.cloud
+      - NETDATA_CLAIM_ROOMS=${NETDATA_CLAIM_ROOMS:-}
+    networks:
+      - cdn-network
+
+  # Uptime Kuma - Uptime мониторинг
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.15
+    container_name: cdn-uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - cdn-network
+
+  # Alertmanager - Алерты из Prometheus
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: cdn-alertmanager
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./docker/alertmanager:/etc/alertmanager
+      - alertmanager-data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - cdn-network
+    depends_on:
+      - prometheus
+
+volumes:
+  # Bitrix files mounted via SSHFS
+  bitrix-mount:
+    driver: local
+
+  # resize_cache - хранится локально, монтируется на Битрикс сервер
+  resize-cache:
+    driver: local
+  
+  # Кеш WebP файлов
+  webp-cache:
+    driver: local
+  
+  # Redis данные
+  redis-data:
+    driver: local
+  
+  # Prometheus данные
+  prometheus-data:
+    driver: local
+  
+  # Grafana данные
+  grafana-data:
+    driver: local
+
+  # WebP Converter async logs
+  webp-logs:
+    driver: local
+
+  # Netdata volumes
+  netdata-config:
+    driver: local
+  netdata-lib:
+    driver: local
+  netdata-cache:
+    driver: local
+
+  # Uptime Kuma data
+  uptime-kuma-data:
+    driver: local
+
+  # Alertmanager data
+  alertmanager-data:
+    driver: local
+
+  # NGINX cache volumes for maximum performance
+  nginx-cache:
+    driver: local
+  nginx-tmp:
+    driver: local
+
+networks:
+  cdn-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24

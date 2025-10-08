@@ -1,0 +1,63 @@
+groups:
+  - name: cdn_alerts
+    interval: 30s
+    rules:
+      # Сервисы недоступны
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Сервис {{ $labels.job }} недоступен"
+          description: "Сервис {{ $labels.job }} на инстансе {{ $labels.instance }} не отвечает более 2 минут"
+
+      # WebP очередь переполнена
+      - alert: WebPQueueOverflow
+        expr: webp_queue_size > 900
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "WebP очередь переполнена"
+          description: "Размер очереди: {{ $value }} (максимум 1000)"
+
+      # WebP очередь критична
+      - alert: WebPQueueCritical
+        expr: webp_queue_size >= 1000
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "WebP очередь ПОЛНАЯ!"
+          description: "Очередь заполнена ({{ $value }}/1000)"
+
+      # CPU высокая нагрузка
+      - alert: HighCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокая загрузка CPU"
+          description: "CPU: {{ $value | humanize }}%"
+
+      # Память критична
+      - alert: CriticalMemoryUsage
+        expr: 100 * (1 - ((node_memory_MemAvailable_bytes) / (node_memory_MemTotal_bytes))) > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Критическая память!"
+          description: "Memory: {{ $value | humanize }}%"
+
+      # Диск критичен
+      - alert: CriticalDiskUsage
+        expr: 100 - ((node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} * 100) / node_filesystem_size_bytes{mountpoint="/",fstype!="rootfs"}) > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Диск заполнен!"
+          description: "Disk: {{ $value | humanize }}%"

@@ -1,0 +1,30 @@
+# WebP/AVIF Converter Default Configuration
+
+# Image processing
+webp_quality: 85
+avif_quality: 80
+min_file_size: 10240  # 10KB
+extensions:
+  - jpg
+  - jpeg
+  - png
+
+# Format support
+enable_webp: true
+enable_avif: true
+
+# Performance - MAXIMUM SPEED
+worker_threads: 12
+batch_size: 50
+max_queue_size: 10000
+rate_limit: 500  # files per minute
+
+# Directories
+watch_dir: /var/www/cdn/upload/resize_cache
+
+# Monitoring
+metrics_port: 9101
+health_port: 8088
+
+# Logging
+log_level: INFO

@@ -1,0 +1,282 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 30, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 9, "w": 16, "x": 0, "y": 0},
+      "id": 1,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "webp_queue_size", "legendFormat": "📦 В очереди", "refId": "A"},
+        {"expr": "rate(webp_images_converted_total[1m]) * 60", "legendFormat": "⚡ Обработано/мин", "refId": "B"},
+        {"expr": "webp_conversion_errors_total", "legendFormat": "❌ Всего ошибок", "refId": "C"}
+      ],
+      "title": "📊 Очередь WebP конвертера в реальном времени",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 500}, {"color": "orange", "value": 800}, {"color": "red", "value": 950}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 0},
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "text": {"titleSize": 14, "valueSize": 32},
+        "textMode": "value_and_name"
+      },
+      "targets": [{"expr": "webp_queue_size", "refId": "A"}],
+      "title": "📦 В очереди",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 0},
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "text": {"titleSize": 14, "valueSize": 32},
+        "textMode": "value_and_name"
+      },
+      "targets": [{"expr": "webp_images_converted_total", "refId": "A"}],
+      "title": "✅ Обработано",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 10}, {"color": "orange", "value": 50}, {"color": "red", "value": 100}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 5, "w": 4, "x": 16, "y": 4},
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "text": {"titleSize": 14, "valueSize": 32},
+        "textMode": "value_and_name"
+      },
+      "targets": [{"expr": "webp_conversion_errors_total", "refId": "A"}],
+      "title": "❌ Ошибок",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 50}, {"color": "green", "value": 70}]},
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"h": 5, "w": 4, "x": 20, "y": 4},
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "text": {"titleSize": 14, "valueSize": 32},
+        "textMode": "value_and_name"
+      },
+      "targets": [{"expr": "webp_compression_ratio", "refId": "A"}],
+      "title": "🗜️ Сжатие",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 9},
+      "id": 6,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
+      "targets": [
+        {"expr": "rate(webp_images_converted_total[1m]) * 60", "legendFormat": "Успешно конвертировано/мин", "refId": "A"},
+        {"expr": "rate(webp_images_skipped_total[1m]) * 60", "legendFormat": "Пропущено/мин", "refId": "B"},
+        {"expr": "rate(webp_conversion_errors_total[1m]) * 60", "legendFormat": "Ошибок/мин", "refId": "C"}
+      ],
+      "title": "⚡ Скорость обработки (файлов в минуту)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "s"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+      "id": 7,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "none"}
+      },
+      "targets": [
+        {"expr": "histogram_quantile(0.50, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p50 (медиана)", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p95", "refId": "B"},
+        {"expr": "histogram_quantile(0.99, rate(webp_conversion_duration_seconds_bucket[5m]))", "legendFormat": "p99", "refId": "C"}
+      ],
+      "title": "⏱️ Время конвертации (перцентили)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 30, "gradientMode": "opacity", "lineWidth": 2, "showPoints": "never"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 17},
+      "id": 8,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "none"}
+      },
+      "targets": [{"expr": "webp_compression_ratio", "legendFormat": "Экономия места", "refId": "A"}],
+      "title": "🗜️ Процент сжатия WebP",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "fillOpacity": 20, "gradientMode": "none", "lineWidth": 2, "showPoints": "never"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "decbytes"
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 17},
+      "id": 9,
+      "options": {
+        "legend": {"calcs": ["last", "max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
+      "targets": [
+        {"expr": "rate(webp_original_size_bytes_sum[5m]) / rate(webp_original_size_bytes_count[5m])", "legendFormat": "Средний размер оригинала", "refId": "A"},
+        {"expr": "rate(webp_webp_size_bytes_sum[5m]) / rate(webp_webp_size_bytes_count[5m])", "legendFormat": "Средний размер WebP", "refId": "B"}
+      ],
+      "title": "📏 Размеры файлов (средние)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Общая статистика работы конвертера с момента запуска",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Всего обработано"}, "properties": [{"id": "color", "value": {"mode": "thresholds"}}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}]},
+          {"matcher": {"id": "byName", "options": "Всего пропущено"}, "properties": [{"id": "color", "value": {"mode": "thresholds"}}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "yellow", "value": null}]}}]},
+          {"matcher": {"id": "byName", "options": "Всего ошибок"}, "properties": [{"id": "color", "value": {"mode": "thresholds"}}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "red", "value": null}]}}]}
+        ]
+      },
+      "gridPos": {"h": 6, "w": 24, "x": 0, "y": 25},
+      "id": 10,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "text": {"titleSize": 16, "valueSize": 28},
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {"expr": "webp_images_converted_total", "legendFormat": "Всего обработано", "refId": "A"},
+        {"expr": "webp_images_skipped_total", "legendFormat": "Всего пропущено", "refId": "B"},
+        {"expr": "webp_conversion_errors_total", "legendFormat": "Всего ошибок", "refId": "C"}
+      ],
+      "title": "📊 Общая статистика",
+      "type": "stat"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["webp", "queue", "cdn"],
+  "templating": {"list": []},
+  "time": {"from": "now-15m", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "🖼️ WebP Конвертер - Очередь",
+  "uid": "webp-queue",
+  "version": 0,
+  "weekStart": ""
+}

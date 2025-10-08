@@ -1,0 +1,39 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Create .env file
+      run: cp .env.example .env
+    
+    - name: Build Docker images
+      run: docker-compose -f docker-compose.yml build
+    
+    - name: Run Docker containers
+      run: docker-compose -f docker-compose.yml up -d
+    
+    - name: Wait for services to start
+      run: sleep 10
+    
+    - name: Check NGINX health
+      run: curl -f http://localhost:8080/health || exit 1
+    
+    - name: Check NGINX status
+      run: curl -f http://localhost:8080/nginx_status || exit 1
+    
+    - name: Stop containers
+      if: always()
+      run: docker-compose -f docker-compose.yml down

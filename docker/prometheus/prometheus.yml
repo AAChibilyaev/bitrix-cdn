@@ -1,0 +1,59 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'bitrix-cdn'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['cdn-alertmanager:9093']
+
+# Rule files
+rule_files:
+  - "alerts.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # NGINX monitoring
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels:
+          service: 'nginx'
+          cdn: 'termokit'
+
+  # Redis monitoring через Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          cdn: 'termokit'
+
+  # Async WebP Converter с Prometheus метриками
+  - job_name: 'webp-converter-async'
+    static_configs:
+      - targets: ['webp-converter-async:9101']
+        labels:
+          service: 'webp-converter-async'
+          cdn: 'termokit'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Node Exporter для системных метрик
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'system'
+          cdn: 'termokit'
