@@ -17,12 +17,6 @@ rule_files:
 
 # Scrape configurations
 scrape_configs:
-  # Prometheus self-monitoring
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
-        labels:
-          service: 'prometheus'
 
   # NGINX monitoring
   - job_name: 'nginx'
@@ -60,6 +54,46 @@ scrape_configs:
       - targets: ['node-exporter:9100']
         labels:
           service: 'system'
+          cdn: 'bitrix'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+        labels:
+          service: 'prometheus'
+          cdn: 'bitrix'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+
+  # Grafana monitoring
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'
+          cdn: 'bitrix'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+
+  # AlertManager monitoring
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+        labels:
+          service: 'alertmanager'
+          cdn: 'bitrix'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+
+  # Memcached monitoring
+  - job_name: 'memcached'
+    static_configs:
+      - targets: ['memcached:11211']
+        labels:
+          service: 'memcached'
           cdn: 'bitrix'
     scrape_interval: 5s
     scrape_timeout: 5s

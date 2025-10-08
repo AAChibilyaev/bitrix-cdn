@@ -1,7 +1,7 @@
 {
   "id": null,
-  "title": "🐳 Docker контейнеры - Мониторинг",
-  "tags": ["docker", "containers", "monitoring", "production", "русский"],
+  "title": "🐳 Статус контейнеров - Простой",
+  "tags": ["docker", "containers", "status", "production", "русский"],
   "style": "dark",
   "timezone": "browser",
   "refresh": "10s",
@@ -12,7 +12,7 @@
   "panels": [
     {
       "id": 1,
-      "title": "🌐 Nginx контейнер",
+      "title": "🌐 Nginx",
       "type": "stat",
       "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
       "targets": [
@@ -38,7 +38,7 @@
     },
     {
       "id": 2,
-      "title": "💾 Redis контейнер",
+      "title": "💾 Redis",
       "type": "stat",
       "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
       "targets": [
@@ -64,7 +64,7 @@
     },
     {
       "id": 3,
-      "title": "🖼️ WebP контейнер",
+      "title": "🖼️ WebP Converter",
       "type": "stat",
       "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
       "targets": [
@@ -90,61 +90,9 @@
     },
     {
       "id": 4,
-      "title": "📊 Prometheus",
-      "type": "stat",
-      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
-      "targets": [
-        {
-          "expr": "up{job=\"prometheus\",cdn=\"bitrix\"} or up{job=\"prometheus\"}",
-          "legendFormat": "Prometheus"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "thresholds": {
-            "steps": [
-              {"color": "red", "value": null},
-              {"color": "green", "value": 1}
-            ]
-          },
-          "mappings": [
-            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
-          ]
-        }
-      }
-    },
-    {
-      "id": 5,
-      "title": "📈 Grafana",
-      "type": "stat",
-      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 6},
-      "targets": [
-        {
-          "expr": "up{job=\"grafana\",cdn=\"bitrix\"} or up{job=\"grafana\"}",
-          "legendFormat": "Grafana"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "thresholds": {
-            "steps": [
-              {"color": "red", "value": null},
-              {"color": "green", "value": 1}
-            ]
-          },
-          "mappings": [
-            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
-          ]
-        }
-      }
-    },
-    {
-      "id": 6,
       "title": "💻 Node Exporter",
       "type": "stat",
-      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 6},
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
       "targets": [
         {
           "expr": "up{job=\"node\",cdn=\"bitrix\"}",
@@ -167,62 +115,10 @@
       }
     },
     {
-      "id": 7,
-      "title": "🚨 AlertManager",
-      "type": "stat",
-      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 6},
-      "targets": [
-        {
-          "expr": "up{job=\"alertmanager\",cdn=\"bitrix\"} or up{job=\"alertmanager\"}",
-          "legendFormat": "AlertManager"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "thresholds": {
-            "steps": [
-              {"color": "red", "value": null},
-              {"color": "green", "value": 1}
-            ]
-          },
-          "mappings": [
-            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
-          ]
-        }
-      }
-    },
-    {
-      "id": 8,
-      "title": "💾 Memcached",
-      "type": "stat",
-      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 6},
-      "targets": [
-        {
-          "expr": "up{job=\"memcached\",cdn=\"bitrix\"} or up{job=\"memcached\"}",
-          "legendFormat": "Memcached"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "thresholds": {
-            "steps": [
-              {"color": "red", "value": null},
-              {"color": "green", "value": 1}
-            ]
-          },
-          "mappings": [
-            {"options": {"0": {"text": "❌ НЕ РАБОТАЕТ", "color": "red"}, "1": {"text": "✅ РАБОТАЕТ", "color": "green"}}, "type": "value"}
-          ]
-        }
-      }
-    },
-    {
-      "id": 9,
-      "title": "📊 Общий статус контейнеров",
+      "id": 5,
+      "title": "📊 Общий статус сервисов",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
       "targets": [
         {
           "expr": "up{job=\"nginx\",cdn=\"bitrix\"}",
@@ -237,12 +133,8 @@
           "legendFormat": "WebP Converter"
         },
         {
-          "expr": "up{job=\"prometheus\",cdn=\"bitrix\"}",
-          "legendFormat": "Prometheus"
-        },
-        {
-          "expr": "up{job=\"grafana\",cdn=\"bitrix\"}",
-          "legendFormat": "Grafana"
+          "expr": "up{job=\"node\",cdn=\"bitrix\"}",
+          "legendFormat": "Node Exporter"
         }
       ],
       "fieldConfig": {
@@ -253,10 +145,10 @@
       }
     },
     {
-      "id": 10,
-      "title": "💾 Использование памяти контейнерами",
+      "id": 6,
+      "title": "💾 Использование памяти",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
       "targets": [
         {
           "expr": "redis_memory_used_bytes{cdn=\"bitrix\"}",
@@ -275,10 +167,10 @@
       }
     },
     {
-      "id": 11,
-      "title": "⚡ Производительность контейнеров",
+      "id": 7,
+      "title": "⚡ Производительность",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
       "targets": [
         {
           "expr": "rate(nginx_http_requests_total{cdn=\"bitrix\"}[1m]) * 60",
@@ -297,10 +189,10 @@
       }
     },
     {
-      "id": 12,
-      "title": "❌ Ошибки контейнеров",
+      "id": 8,
+      "title": "❌ Ошибки",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
       "targets": [
         {
           "expr": "rate(nginx_http_requests_total{status=~\"5..\",cdn=\"bitrix\"}[1m]) * 60",
