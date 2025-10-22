@@ -8,7 +8,7 @@ import logging
 from typing import Optional, List, Dict, Any
 from telegram import Update
 from telegram.ext import ContextTypes
-from utils import is_authorized_user, escape_markdown, truncate_text
+from utils import escape_markdown, truncate_text
 from prometheus_client import PrometheusClient
 from docker_client import DockerClient
 from ai_analyzer import AIAnalyzer
@@ -68,20 +68,24 @@ def is_authorized(update: Update) -> bool:
     user_id = update.effective_user.id
     chat_id = update.effective_chat.id
     chat_type = update.effective_chat.type
-    
+
     # Если нет ограничений - разрешаем всем
     if not ALLOWED_USERS and not ALLOWED_GROUPS:
         return True
-    
+
     # Проверяем пользователя
     if user_id in ALLOWED_USERS:
         return True
-    
+
     # Проверяем группу
     if chat_type in ['group', 'supergroup'] and chat_id in ALLOWED_GROUPS:
         return True
-    
+
     return False
+
+def check_clients_initialized() -> bool:
+    """Проверка инициализации всех клиентов"""
+    return all([prometheus_client, docker_client, ai_analyzer, alerts_client, config])
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /start"""
@@ -139,7 +143,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /help"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -199,7 +203,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /status - общий статус системы"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -232,7 +236,7 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def nginx_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /nginx - информация о Nginx"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -251,10 +255,14 @@ async def nginx_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def redis_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /redis - статистика Redis"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
-    
+
+    if not check_clients_initialized():
+        await update.message.reply_text("❌ Клиенты не инициализированы. Попробуйте позже.")
+        return
+
     try:
         # Получаем статус Redis
         redis_status = await docker_client.get_container_status('cdn-redis')
@@ -283,7 +291,7 @@ async def redis_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def webp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /webp - статус WebP конвертера"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -317,7 +325,7 @@ async def webp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def containers_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /containers - список всех контейнеров"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -343,7 +351,7 @@ async def containers_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def health_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /health - health checks всех сервисов"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -369,7 +377,7 @@ async def health_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cache_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /cache - статистика кеширования"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -476,7 +484,7 @@ def _format_analysis_result(analysis: AIAnalysisResult) -> str:
 
 async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /report - полный отчет о системе"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -518,7 +526,7 @@ async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def alerts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /alerts - текущие алерты"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -545,7 +553,7 @@ async def alerts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /subscribe - подписка на уведомления"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     
@@ -554,7 +562,7 @@ async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def unsubscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /unsubscribe - отписка от уведомлений"""
-    if not is_authorized_user(update.effective_user.id, config):
+    if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
     

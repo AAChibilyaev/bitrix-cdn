@@ -98,15 +98,13 @@ def main():
         
         # Create notification service
         notification_service = NotificationService(app.bot, config)
-        
+
         logger.info("Бот готов к работе!")
-        
+
         # Start notification service in background
-        import asyncio
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.create_task(notification_service.start())
-        
+        # Note: NotificationService будет запущен в фоновом режиме во время работы бота
+        # используя существующий event loop от telegram bot
+
         # Запуск бота
         app.run_polling()
         
