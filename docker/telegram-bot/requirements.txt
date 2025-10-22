@@ -1,0 +1,28 @@
+# Core dependencies
+python-telegram-bot==20.7
+prometheus-api-client==0.5.3
+docker==7.0.0
+pyyaml==6.0.1
+aiohttp==3.9.1
+openai==1.6.1
+requests==2.31.0
+python-dotenv==1.0.0
+
+# Type checking and validation
+mypy==1.8.0
+pydantic==2.5.2
+typing-extensions==4.9.0
+
+# Async and scheduling
+asyncio-mqtt==0.16.1
+schedule==1.2.0
+
+# Monitoring and metrics
+psutil==5.9.6
+prometheus-client==0.19.0
+
+# Development and testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.12.1
+flake8==6.1.0

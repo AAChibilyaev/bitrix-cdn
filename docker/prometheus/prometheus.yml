@@ -18,15 +18,15 @@ rule_files:
 # Scrape configurations
 scrape_configs:
 
-  # NGINX monitoring - DISABLED (exporter issues)
-  # - job_name: 'nginx'
-  #   static_configs:
-  #     - targets: ['nginx-exporter:9113']
-  #       labels:
-  #         service: 'nginx'
-  #         cdn: 'bitrix'
-  #   scrape_interval: 5s
-  #   scrape_timeout: 5s
+  # NGINX monitoring - ENABLED
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels:
+          service: 'nginx'
+          cdn: 'bitrix'
+    scrape_interval: 5s
+    scrape_timeout: 5s
 
   # Redis monitoring через Redis Exporter
   - job_name: 'redis'

@@ -50,6 +50,9 @@ services:
 
       # Логи
       - ./logs/nginx:/var/log/nginx
+      
+      # SSL сертификаты
+      - ./docker/nginx/2025:/etc/nginx/ssl/cdn.termokit.ru
     depends_on:
       - webp-converter-async
       - sshfs
@@ -159,9 +162,9 @@ services:
       - redis-data:/data
     networks:
       - cdn-network
-    command: redis-server --maxmemory 2gb --maxmemory-policy allkeys-lru --appendonly no --save "" --tcp-keepalive 60 --timeout 0 --hz 100 --dynamic-hz yes --tcp-backlog 511 --databases 1 --rdbcompression no --rdbchecksum no --stop-writes-on-bgsave-error no --slave-serve-stale-data yes --slave-read-only yes --repl-diskless-sync no --repl-diskless-sync-delay 5 --repl-ping-slave-period 10 --repl-timeout 60 --repl-disable-tcp-nodelay no --repl-backlog-size 1mb --repl-backlog-ttl 3600 --maxclients 10000 --aof-rewrite-incremental-fsync yes --rdb-save-incremental-fsync yes --always-show-logo yes
+    command: redis-server --maxmemory 2gb --maxmemory-policy allkeys-lru --appendonly no --save "" --tcp-keepalive 60 --timeout 0 --hz 100 --dynamic-hz yes --tcp-backlog 511 --databases 1 --rdbcompression no --rdbchecksum no --stop-writes-on-bgsave-error no --slave-serve-stale-data yes --slave-read-only yes --repl-diskless-sync no --repl-diskless-sync-delay 5 --repl-ping-slave-period 10 --repl-timeout 60 --repl-disable-tcp-nodelay no --repl-backlog-size 1mb --repl-backlog-ttl 3600 --maxclients 10000 --aof-rewrite-incremental-fsync yes --rdb-save-incremental-fsync yes --always-show-logo yes --requirepass ${REDIS_PASSWORD:-bitrix_cdn_secure_2024} --protected-mode yes --bind 127.0.0.1
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-bitrix_cdn_secure_2024}", "ping"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -266,7 +269,7 @@ services:
       - "127.0.0.1:9121:9121"
     environment:
       - REDIS_ADDR=redis://redis:6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-bitrix_cdn_secure_2024}
     networks:
       - cdn-network
     depends_on:
@@ -291,6 +294,27 @@ services:
     networks:
       - cdn-network
     pid: host
+
+  # Telegram Bot для мониторинга
+  telegram-bot:
+    build:
+      context: ./docker/telegram-bot
+      dockerfile: Dockerfile
+    container_name: cdn-telegram-bot
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-bitrix_cdn_secure_2024}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/telegram-bot/config.yml:/app/config.yml:ro
+    networks:
+      - cdn-network
+    depends_on:
+      - prometheus
+      - alertmanager
+      - redis
 
   # Netdata - Real-time мониторинг
   netdata:

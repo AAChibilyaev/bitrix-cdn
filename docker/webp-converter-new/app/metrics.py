@@ -45,6 +45,11 @@ class Metrics:
             'Size of WebP images in bytes'
         )
 
+        self.avif_size = Summary(
+            'webp_avif_size_bytes',
+            'Size of AVIF images in bytes'
+        )
+
         # Gauge for current values
         self.queue_size = Gauge(
             'webp_queue_size',
@@ -54,6 +59,11 @@ class Metrics:
         self.compression_ratio = Gauge(
             'webp_compression_ratio',
             'Current compression ratio (percentage saved)'
+        )
+
+        self.avif_compression_ratio = Gauge(
+            'webp_avif_compression_ratio',
+            'Current AVIF compression ratio (percentage saved)'
         )
 
         # AVIF metrics

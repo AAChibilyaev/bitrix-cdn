@@ -19,28 +19,31 @@ redis_stats() {
     echo -e "\n${BLUE}📊 Redis Cache Statistics${NC}"
     echo "============================="
     
+    # Get Redis password from environment or use default
+    local redis_password="${REDIS_PASSWORD:-bitrix_cdn_secure_2024}"
+    
     # Redis info
-    local redis_info=$(docker exec cdn-redis redis-cli info memory | grep used_memory_human)
+    local redis_info=$(docker exec cdn-redis redis-cli -a "$redis_password" info memory | grep used_memory_human)
     echo "Redis memory usage: $redis_info"
     
     # Redis keys count
-    local keys=$(docker exec cdn-redis redis-cli dbsize)
+    local keys=$(docker exec cdn-redis redis-cli -a "$redis_password" dbsize)
     echo "Redis keys count: $keys"
     
     # Redis hit rate
-    local hits=$(docker exec cdn-redis redis-cli info stats | grep keyspace_hits | cut -d: -f2 | tr -d '\r')
-    local misses=$(docker exec cdn-redis redis-cli info stats | grep keyspace_misses | cut -d: -f2 | tr -d '\r')
+    local hits=$(docker exec cdn-redis redis-cli -a "$redis_password" info stats | grep keyspace_hits | cut -d: -f2 | tr -d '\r')
+    local misses=$(docker exec cdn-redis redis-cli -a "$redis_password" info stats | grep keyspace_misses | cut -d: -f2 | tr -d '\r')
     if [ "$hits" -gt 0 ] || [ "$misses" -gt 0 ]; then
         local hit_rate=$(echo "scale=2; $hits * 100 / ($hits + $misses)" | bc -l 2>/dev/null || echo "0")
         echo "Redis hit rate: ${hit_rate}%"
     fi
     
     # Redis connected clients
-    local clients=$(docker exec cdn-redis redis-cli info clients | grep connected_clients | cut -d: -f2 | tr -d '\r')
+    local clients=$(docker exec cdn-redis redis-cli -a "$redis_password" info clients | grep connected_clients | cut -d: -f2 | tr -d '\r')
     echo "Connected clients: $clients"
     
     # Redis operations per second
-    local ops=$(docker exec cdn-redis redis-cli info stats | grep instantaneous_ops_per_sec | cut -d: -f2 | tr -d '\r')
+    local ops=$(docker exec cdn-redis redis-cli -a "$redis_password" info stats | grep instantaneous_ops_per_sec | cut -d: -f2 | tr -d '\r')
     echo "Operations per second: $ops"
 }
 
@@ -67,7 +70,11 @@ nginx_cache_stats() {
 # Clear Redis cache
 clear_redis() {
     echo -e "\n${YELLOW}🗑️ Clearing Redis cache...${NC}"
-    docker exec cdn-redis redis-cli flushall
+    
+    # Get Redis password from environment or use default
+    local redis_password="${REDIS_PASSWORD:-bitrix_cdn_secure_2024}"
+    
+    docker exec cdn-redis redis-cli -a "$redis_password" flushall
     echo -e "${GREEN}✅ Redis cache cleared${NC}"
 }
 

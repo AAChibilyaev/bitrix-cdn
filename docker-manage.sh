@@ -36,6 +36,7 @@ print_help() {
     echo "  perf        - Performance monitoring"
     echo "  cache       - Cache management"
     echo "  avif        - AVIF converter management"
+    echo "  telegram-bot - Telegram Bot management"
     echo "  backup      - Backup configuration"
     echo "  restore     - Restore from backup"
     echo "  ssl         - Setup SSL certificates"
@@ -135,7 +136,8 @@ show_status() {
     fi
     
     # Check Redis
-    if docker exec cdn-redis redis-cli ping | grep -q "PONG"; then
+    local redis_password="${REDIS_PASSWORD:-bitrix_cdn_secure_2024}"
+    if docker exec cdn-redis redis-cli -a "$redis_password" ping | grep -q "PONG"; then
         echo -e "${GREEN}✓ Redis is healthy${NC}"
     else
         echo -e "${RED}✗ Redis is not responding${NC}"
@@ -356,6 +358,61 @@ main() {
             echo "  optimize        - Optimize cache settings"
             echo ""
             echo "Usage: ./docker-manage.sh cache [command]"
+        fi
+        ;;
+    telegram-bot)
+        if [ -n "$2" ]; then
+            case "$2" in
+                start)
+                    echo -e "${BLUE}🤖 Starting Telegram Bot...${NC}"
+                    docker compose up -d telegram-bot
+                    echo -e "${GREEN}✅ Telegram Bot started${NC}"
+                    ;;
+                stop)
+                    echo -e "${BLUE}🤖 Stopping Telegram Bot...${NC}"
+                    docker compose stop telegram-bot
+                    echo -e "${GREEN}✅ Telegram Bot stopped${NC}"
+                    ;;
+                restart)
+                    echo -e "${BLUE}🤖 Restarting Telegram Bot...${NC}"
+                    docker compose restart telegram-bot
+                    echo -e "${GREEN}✅ Telegram Bot restarted${NC}"
+                    ;;
+                logs)
+                    echo -e "${BLUE}🤖 Telegram Bot logs:${NC}"
+                    docker logs -f cdn-telegram-bot
+                    ;;
+                status)
+                    echo -e "${BLUE}🤖 Telegram Bot status:${NC}"
+                    docker ps --filter name=cdn-telegram-bot --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+                    ;;
+                build)
+                    echo -e "${BLUE}🤖 Building Telegram Bot...${NC}"
+                    docker compose build telegram-bot
+                    echo -e "${GREEN}✅ Telegram Bot built${NC}"
+                    ;;
+                *)
+                    echo -e "${YELLOW}Available telegram-bot commands:${NC}"
+                    echo "  start     - Start Telegram Bot"
+                    echo "  stop      - Stop Telegram Bot"
+                    echo "  restart   - Restart Telegram Bot"
+                    echo "  logs      - Show Telegram Bot logs"
+                    echo "  status    - Show Telegram Bot status"
+                    echo "  build     - Build Telegram Bot image"
+                    echo ""
+                    echo "Usage: ./docker-manage.sh telegram-bot [command]"
+                    ;;
+            esac
+        else
+            echo -e "${YELLOW}Available telegram-bot commands:${NC}"
+            echo "  start     - Start Telegram Bot"
+            echo "  stop      - Stop Telegram Bot"
+            echo "  restart   - Restart Telegram Bot"
+            echo "  logs      - Show Telegram Bot logs"
+            echo "  status    - Show Telegram Bot status"
+            echo "  build     - Build Telegram Bot image"
+            echo ""
+            echo "Usage: ./docker-manage.sh telegram-bot [command]"
         fi
         ;;
     help|*)

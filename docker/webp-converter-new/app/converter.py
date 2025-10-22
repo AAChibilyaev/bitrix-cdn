@@ -58,8 +58,15 @@ class ImageConverter:
         start_time = asyncio.get_event_loop().time()
         try:
             file_path = Path(file_path)
-            webp_path = file_path.with_suffix(file_path.suffix + '.webp')
-            avif_path = file_path.with_suffix(file_path.suffix + '.avif')
+            webp_path = file_path.with_suffix('.webp')
+            avif_path = file_path.with_suffix('.avif')
+
+            # Validate file before processing
+            if not await self._validate_file(file_path):
+                logger.warning("Skipping invalid file", file=str(file_path))
+                duration = asyncio.get_event_loop().time() - start_time
+                self.queue.mark_completed(worker_id, str(file_path.name), 'invalid', duration)
+                return
 
             # Mark as processing
             self.queue.mark_processing(worker_id, str(file_path.name))
@@ -136,6 +143,29 @@ class ImageConverter:
                 return False
 
         return True
+
+    async def _validate_file(self, file_path: Path) -> bool:
+        """Validate file before processing"""
+        try:
+            # Check if file exists and is readable
+            if not file_path.exists() or not file_path.is_file():
+                return False
+
+            # Check file size
+            if file_path.stat().st_size < self.config.min_file_size:
+                return False
+
+            # Check if file is a valid image
+            try:
+                with Image.open(file_path) as img:
+                    # Try to load the image to check if it's valid
+                    img.verify()
+                return True
+            except Exception:
+                return False
+
+        except Exception:
+            return False
 
     async def _convert_to_webp(self, original_path: Path, webp_path: Path, worker_id: int):
         """Convert image to WebP"""

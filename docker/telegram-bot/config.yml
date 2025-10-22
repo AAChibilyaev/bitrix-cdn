@@ -1,0 +1,45 @@
+telegram:
+  token: "${TELEGRAM_BOT_TOKEN}"
+  allowed_users: [142636541]  # Ваш chat_id из логов
+  allowed_groups: []  # Пустой список = все группы, или список group_id
+  admin_users: [142636541]    # Администраторы с расширенными правами
+
+prometheus:
+  url: "http://prometheus:9090"
+
+docker:
+  socket: "/var/run/docker.sock"
+
+openai:
+  api_key: "${OPENAI_API_KEY}"
+  model: "gpt-4-turbo-preview"
+
+alertmanager:
+  url: "http://alertmanager:9093"
+
+notifications:
+  enabled: true
+  check_interval: 60  # секунды
+  critical_only: false
+
+services:
+  - name: nginx
+    container: cdn-nginx
+  - name: redis
+    container: cdn-redis
+  - name: webp-converter
+    container: cdn-webp-converter-async
+  - name: prometheus
+    container: cdn-prometheus
+  - name: grafana
+    container: cdn-grafana
+  - name: alertmanager
+    container: cdn-alertmanager
+  - name: sshfs
+    container: cdn-sshfs
+  - name: node-exporter
+    container: cdn-node-exporter
+  - name: nginx-exporter
+    container: cdn-nginx-exporter
+  - name: redis-exporter
+    container: cdn-redis-exporter
