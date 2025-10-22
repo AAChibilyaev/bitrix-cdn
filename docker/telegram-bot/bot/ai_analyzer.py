@@ -14,8 +14,6 @@ from models import (
     AppConfig, ContainerInfo, HealthCheckResult, AllMetrics, 
     CacheStatistics, AISystemAnalysis, AITrendAnalysis, AIRecommendation
 )
-from ai_cache import cached_system_analysis, cached_trend_analysis
-
 logger = logging.getLogger(__name__)
 
 class AIAnalyzer:
@@ -31,15 +29,10 @@ class AIAnalyzer:
         
         logger.info("Modern AI Analyzer initialized with new OpenAI API")
     
-    async def analyze_system(self, use_cache: bool = True) -> AISystemAnalysis:
-        """Анализ системы - теперь 3 строки вместо 70"""
+    async def analyze_system(self) -> AISystemAnalysis:
+        """Анализ системы с использованием GPT-4o"""
         context = await self._prepare_context_data()
-        
-        if use_cache:
-            result = await cached_system_analysis(context)
-            if result:
-                return result
-        
+
         # Используем новый OpenAI API с Structured Outputs
         result = await self._call_openai_with_structured_output(context)
         return result
@@ -60,7 +53,7 @@ class AIAnalyzer:
         """Вызов OpenAI с Structured Outputs"""
         try:
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model=self.config.openai.model,
                 messages=[
                     {"role": "system", "content": """Ты эксперт по DevOps и системам CDN. Проанализируй состояние системы Bitrix CDN и предоставь:
 
@@ -115,7 +108,7 @@ class AIAnalyzer:
         """Вызов OpenAI для анализа трендов"""
         try:
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model=self.config.openai.model,
                 messages=[
                     {"role": "system", "content": """Ты эксперт по анализу трендов в системах CDN. Проанализируй тренды и предоставь:
 
@@ -167,9 +160,9 @@ class AIAnalyzer:
         try:
             context = await self._prepare_context_data()
             full_context = f"Вопрос пользователя: {question}\n\nДанные системы:\n{context}"
-            
+
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model=self.config.openai.model,
                 messages=[
                     {"role": "system", "content": "Ты эксперт по DevOps и системам CDN. Отвечай на русском языке, будь конкретным и практичным."},
                     {"role": "user", "content": full_context}
@@ -192,7 +185,7 @@ class AIAnalyzer:
         """Анализ кода и конфигураций"""
         try:
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model=self.config.openai.model,
                 messages=[
                     {"role": "system", "content": "Ты эксперт по анализу кода и конфигураций систем CDN. Найди ошибки, проблемы производительности, неоптимальные настройки и дай рекомендации. Отвечай на русском языке."},
                     {"role": "user", "content": f"Проанализируй конфигурации:\n\n{configs_info}"}
@@ -215,7 +208,7 @@ class AIAnalyzer:
         """Поиск проблем в системе"""
         try:
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model=self.config.openai.model,
                 messages=[
                     {"role": "system", "content": "Ты эксперт по диагностике систем CDN. Ищи критические проблемы, предупреждения, проблемы производительности и ошибки в логах. Отвечай на русском языке, структурированно."},
                     {"role": "user", "content": f"Найди проблемы в системе:\n\n{debug_info}"}
@@ -238,7 +231,7 @@ class AIAnalyzer:
         """Получение рекомендаций по оптимизации"""
         try:
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model=self.config.openai.model,
                 messages=[
                     {"role": "system", "content": "Ты эксперт по оптимизации систем CDN. Предоставь приоритетные рекомендации, оптимизацию производительности, настройки кеширования, мониторинг и алерты, масштабирование. Отвечай на русском языке, будь конкретным и практичным."},
                     {"role": "user", "content": f"Дай рекомендации по оптимизации:\n\n{current_state}"}
@@ -283,13 +276,13 @@ class AIAnalyzer:
                 context += f"Nginx метрики: {nginx_metrics}\n"
             
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model=self.config.openai.model,
                 messages=[
                     {"role": "system", "content": "Ты эксперт по оптимизации систем CDN. Проанализируй состояние системы и предоставь приоритетные рекомендации, оптимизацию производительности, настройки кеширования, мониторинг и алерты, масштабирование. Отвечай на русском языке, будь конкретным и практичным."},
                     {"role": "user", "content": context}
                 ],
-                max_tokens=2000,
-                temperature=0.7
+                max_tokens=self.config.openai.max_tokens,
+                temperature=self.config.openai.temperature
             )
             
             return response.choices[0].message.content
