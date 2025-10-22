@@ -23,7 +23,7 @@ from handlers import (
     debug_command, suggest_command, quick_command, ping_command,
     summary_command, tips_command, shortcuts_command, trends_command,
     compare_command, forecast_command, settings_command, help_advanced_command,
-    init_clients, load_allowed_users
+    commands_command, init_clients, load_allowed_users, set_notification_service
 )
 from notifications import NotificationService
 from config_loader import load_config, validate_config
@@ -56,6 +56,7 @@ def main():
         # Регистрация команд
         app.add_handler(CommandHandler("start", start_command))
         app.add_handler(CommandHandler("help", help_command))
+        app.add_handler(CommandHandler("commands", commands_command))
         app.add_handler(CommandHandler("status", status_command))
         app.add_handler(CommandHandler("nginx", nginx_command))
         app.add_handler(CommandHandler("redis", redis_command))
@@ -98,6 +99,7 @@ def main():
         
         # Create notification service
         notification_service = NotificationService(app.bot, config)
+        set_notification_service(notification_service)
 
         logger.info("Бот готов к работе!")
 

@@ -27,6 +27,7 @@ docker_client: Optional[DockerClient] = None
 ai_analyzer: Optional[AIAnalyzer] = None
 alerts_client: Optional[AlertsClient] = None
 config: Optional[AppConfig] = None
+notification_service = None  # NotificationService инициализируется в main.py
 
 def init_clients(app_config: AppConfig) -> None:
     """Инициализация клиентов"""
@@ -36,6 +37,11 @@ def init_clients(app_config: AppConfig) -> None:
     docker_client = DockerClient(config)
     ai_analyzer = AIAnalyzer(config)
     alerts_client = AlertsClient(config)
+
+def set_notification_service(service) -> None:
+    """Установка notification service"""
+    global notification_service
+    notification_service = service
 
 # Список разрешенных пользователей и групп
 ALLOWED_USERS: set[int] = set()
@@ -556,18 +562,46 @@ async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
-    
-    # TODO: Реализовать подписку на уведомления
-    await update.message.reply_text("✅ Подписка на уведомления активирована!")
+
+    if not notification_service:
+        await update.message.reply_text("❌ Служба уведомлений недоступна.")
+        return
+
+    chat_id = update.effective_chat.id
+
+    if notification_service.is_subscribed(chat_id):
+        await update.message.reply_text("ℹ️ Вы уже подписаны на уведомления.")
+        return
+
+    notification_service.subscribe(chat_id)
+    text = "✅ *Подписка на уведомления активирована!*\n\n"
+    text += "Теперь вы будете получать уведомления о:\n"
+    text += "• Критических проблемах системы\n"
+    text += "• Остановке контейнеров\n"
+    text += "• Проблемах с производительностью\n"
+    text += "• Алертах из AlertManager\n\n"
+    text += "Используйте /unsubscribe для отписки."
+
+    await update.message.reply_text(text, parse_mode='Markdown')
 
 async def unsubscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /unsubscribe - отписка от уведомлений"""
     if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
-    
-    # TODO: Реализовать отписку от уведомлений
-    await update.message.reply_text("✅ Отписка от уведомлений выполнена!")
+
+    if not notification_service:
+        await update.message.reply_text("❌ Служба уведомлений недоступна.")
+        return
+
+    chat_id = update.effective_chat.id
+
+    if not notification_service.is_subscribed(chat_id):
+        await update.message.reply_text("ℹ️ Вы не подписаны на уведомления.")
+        return
+
+    notification_service.unsubscribe(chat_id)
+    await update.message.reply_text("✅ Отписка от уведомлений выполнена! Вы больше не будете получать автоматические уведомления.")
 
 # Удобные команды для быстрого доступа
 async def quick_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1295,6 +1329,51 @@ async def gather_debug_info() -> str:
         return "\n".join(debug_info)
     except Exception as e:
         return f"Ошибка сбора отладочной информации: {e}"
+
+async def commands_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Команда /commands - интерактивная подсказка команд"""
+    if not is_authorized(update):
+        await update.message.reply_text("❌ У вас нет доступа к этому боту.")
+        return
+
+    text = """
+🤖 *ДОСТУПНЫЕ КОМАНДЫ БОТА*
+
+*🔍 Мониторинг:*
+/status - Общий статус системы
+/containers - Список всех контейнеров
+/health - Health checks сервисов
+/nginx - Информация о Nginx
+/redis - Статистика Redis
+/webp - Статус WebP конвертера
+/cache - Статистика кеширования
+
+*🤖 AI-Анализ:*
+/analyze - AI анализ системы с GPT-4o
+/ask [вопрос] - Задать вопрос боту
+/trends - Анализ трендов производительности
+/suggest - Рекомендации по оптимизации
+
+*📊 Отчеты:*
+/report - Полный отчет о системе
+/alerts - Текущие алерты
+
+*⚡ Быстрые команды:*
+/quick - Быстрый обзор
+/ping - Проверка отзывчивости
+/tips - Полезные советы
+
+*🔔 Уведомления:*
+/subscribe - Подписка на уведомления
+/unsubscribe - Отписка
+
+*ℹ️ Помощь:*
+/help - Список всех команд
+/commands - Эта подсказка
+
+Попробуйте команды прямо сейчас! 🚀
+    """
+    await update.message.reply_text(text, parse_mode='Markdown')
 
 # Дополнительные команды (заглушки)
 async def prometheus_command(update: Update, context: ContextTypes.DEFAULT_TYPE):

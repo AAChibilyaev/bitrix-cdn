@@ -9,27 +9,28 @@ from typing import Set, Dict, Any, List
 from prometheus_client import PrometheusClient
 from docker_client import DockerClient
 from alerts import AlertsClient
+from models import AppConfig
 
 logger = logging.getLogger(__name__)
 
 class NotificationService:
     """Служба проактивных уведомлений"""
-    
-    def __init__(self, bot, config: Dict[str, Any]):
+
+    def __init__(self, bot, config: AppConfig):
         self.bot = bot
         self.config = config
         self.prometheus = PrometheusClient(config)
         self.docker = DockerClient(config)
         self.alerts = AlertsClient(config)
-        
+
         # Подписчики на уведомления
         self.subscribers: Set[int] = set()
-        
+
         # Настройки уведомлений
-        self.notifications_config = config.get('notifications', {})
-        self.enabled = self.notifications_config.get('enabled', True)
-        self.check_interval = self.notifications_config.get('check_interval', 60)
-        self.critical_only = self.notifications_config.get('critical_only', False)
+        self.notifications_config = config.notifications
+        self.enabled = self.notifications_config.enabled
+        self.check_interval = self.notifications_config.check_interval
+        self.critical_only = self.notifications_config.critical_only
         
         logger.info(f"Notification service initialized: enabled={self.enabled}, interval={self.check_interval}s")
     

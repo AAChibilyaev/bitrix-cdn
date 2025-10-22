@@ -14,8 +14,6 @@ from models import (
     AppConfig, ContainerInfo, HealthCheckResult, AllMetrics, 
     CacheStatistics, AISystemAnalysis, AITrendAnalysis, AIRecommendation
 )
-from ai_cache import cached_system_analysis, cached_trend_analysis
-
 logger = logging.getLogger(__name__)
 
 class AIAnalyzer:
@@ -31,15 +29,10 @@ class AIAnalyzer:
         
         logger.info("Modern AI Analyzer initialized with new OpenAI API")
     
-    async def analyze_system(self, use_cache: bool = True) -> AISystemAnalysis:
-        """Анализ системы - теперь 3 строки вместо 70"""
+    async def analyze_system(self) -> AISystemAnalysis:
+        """Анализ системы с использованием GPT-4o"""
         context = await self._prepare_context_data()
-        
-        if use_cache:
-            result = await cached_system_analysis(context)
-            if result:
-                return result
-        
+
         # Используем новый OpenAI API с Structured Outputs
         result = await self._call_openai_with_structured_output(context)
         return result
