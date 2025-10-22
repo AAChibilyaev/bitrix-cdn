@@ -50,6 +50,14 @@ __pycache__/
 *.pyd
 .Python
 
+# Python virtual environments
+venv/
+env/
+ENV/
+test_env/
+.venv/
+.env/
+
 # Test files
 test.html
 /tmp/

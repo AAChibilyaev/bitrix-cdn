@@ -6,6 +6,7 @@
 from typing import Dict, List, Optional, Union, Any, Literal
 from dataclasses import dataclass
 from enum import Enum
+from pydantic import BaseModel, Field
 
 # Базовые типы
 ChatId = int
@@ -154,7 +155,32 @@ class NotificationIssue:
     service: ServiceName
     message: str
 
-# AI анализ
+# AI анализ - Pydantic модели для Structured Outputs
+class AISystemAnalysis(BaseModel):
+    """Типизированный результат AI анализа системы"""
+    status: Literal["healthy", "warning", "critical"]
+    overall_health_score: int = Field(ge=0, le=100, description="Общая оценка здоровья системы от 0 до 100")
+    problems: List[str] = Field(default_factory=list, description="Список выявленных проблем")
+    recommendations: List[str] = Field(default_factory=list, description="Рекомендации по улучшению")
+    forecast: Optional[str] = Field(None, description="Прогноз развития ситуации")
+    
+class AITrendAnalysis(BaseModel):
+    """Анализ трендов производительности"""
+    trend_direction: Literal["increasing", "decreasing", "stable"]
+    predicted_issues: List[str] = Field(default_factory=list, description="Предсказанные проблемы")
+    optimization_suggestions: List[str] = Field(default_factory=list, description="Предложения по оптимизации")
+    confidence_score: int = Field(ge=0, le=100, description="Уверенность в прогнозе от 0 до 100")
+    
+class AIRecommendation(BaseModel):
+    """Рекомендация по оптимизации"""
+    priority: Literal["low", "medium", "high", "critical"]
+    category: Literal["performance", "security", "reliability", "scalability"]
+    title: str
+    description: str
+    implementation_steps: List[str] = Field(default_factory=list)
+    estimated_impact: str
+
+# Обратная совместимость - старый dataclass
 @dataclass
 class AIAnalysisResult:
     status: str

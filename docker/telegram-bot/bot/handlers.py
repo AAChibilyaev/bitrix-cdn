@@ -8,14 +8,15 @@ import logging
 from typing import Optional, List, Dict, Any
 from telegram import Update
 from telegram.ext import ContextTypes
-from bot.utils import is_authorized_user, escape_markdown, truncate_text
-from bot.prometheus_client import PrometheusClient
-from bot.docker_client import DockerClient
-from bot.ai_analyzer import AIAnalyzer
-from bot.alerts import AlertsClient
-from bot.types import (
+from utils import is_authorized_user, escape_markdown, truncate_text
+from prometheus_client import PrometheusClient
+from docker_client import DockerClient
+from ai_analyzer import AIAnalyzer
+from alerts import AlertsClient
+from models import (
     AppConfig, ContainerInfo, HealthCheckResult, AllMetrics, 
-    CacheStatistics, AIAnalysisResult, Alert, CommandResult
+    CacheStatistics, AIAnalysisResult, Alert, CommandResult,
+    AISystemAnalysis, AITrendAnalysis
 )
 
 logger = logging.getLogger(__name__)
@@ -398,7 +399,7 @@ async def cache_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Ошибка получения статистики кеша: {e}")
 
 async def analyze_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Команда /analyze - AI-анализ системы"""
+    """Команда /analyze - AI-анализ системы с типизированными результатами"""
     if not is_authorized(update):
         await update.message.reply_text("❌ У вас нет доступа к этому боту.")
         return
@@ -410,11 +411,11 @@ async def analyze_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     try:
         await update.message.reply_text("🤖 Выполняю AI-анализ системы... Это может занять несколько секунд.")
         
-        # Получаем AI-анализ
-        analysis_result = await ai_analyzer.analyze_system()
+        # Получаем типизированный AI-анализ
+        analysis: AISystemAnalysis = await ai_analyzer.analyze_system()
         
-        # Форматируем результат
-        response_text = _format_analysis_result(analysis_result)
+        # Форматируем результат из Pydantic модели
+        response_text = _format_modern_analysis_result(analysis)
         
         # Обрезаем текст если слишком длинный
         response_text = truncate_text(response_text, 4000)
@@ -425,8 +426,32 @@ async def analyze_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         logger.error(f"Ошибка команды analyze: {e}")
         await update.message.reply_text(f"❌ Ошибка AI-анализа: {e}")
 
+def _format_modern_analysis_result(analysis: AISystemAnalysis) -> str:
+    """Форматирование современного результата AI-анализа из Pydantic модели"""
+    status_emoji = "✅" if analysis.status == "healthy" else "⚠️" if analysis.status == "warning" else "🚨"
+    
+    text = f"{status_emoji} *Статус:* {analysis.status.upper()}\n"
+    text += f"📊 *Оценка здоровья:* {analysis.overall_health_score}/100\n\n"
+    
+    if analysis.problems:
+        text += "⚠️ *Проблемы:*\n"
+        for problem in analysis.problems:
+            text += f"• {problem}\n"
+        text += "\n"
+    
+    if analysis.recommendations:
+        text += "💡 *Рекомендации:*\n"
+        for recommendation in analysis.recommendations:
+            text += f"• {recommendation}\n"
+        text += "\n"
+    
+    if analysis.forecast:
+        text += f"🔮 *Прогноз:* {analysis.forecast}\n"
+    
+    return text
+
 def _format_analysis_result(analysis: AIAnalysisResult) -> str:
-    """Форматирование результата AI-анализа"""
+    """Форматирование старого результата AI-анализа (обратная совместимость)"""
     text = f"📊 *Статус:* {analysis.status}\n\n"
     
     if analysis.problems:

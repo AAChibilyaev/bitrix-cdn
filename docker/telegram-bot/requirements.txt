@@ -4,14 +4,20 @@ prometheus-api-client==0.5.3
 docker==7.0.0
 pyyaml==6.0.1
 aiohttp==3.9.1
-openai==1.6.1
 requests==2.31.0
 python-dotenv==1.0.0
+
+# AI и типизация (НОВОЕ) - минимальный набор
+openai==1.50.0              # Новый API с Structured Outputs
+tenacity==8.2.0             # Retry logic для API
+
+# Кеширование (УПРОЩЕНИЕ)
+diskcache==5.6.0            # Замена самописного кеша на готовое решение
 
 # Type checking and validation
 mypy==1.8.0
 pydantic==2.5.2
-typing-extensions==4.9.0
+typing-extensions==4.11.0
 
 # Async and scheduling
 asyncio-mqtt==0.16.1

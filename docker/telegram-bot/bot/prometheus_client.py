@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 class PrometheusClient:
     """Клиент для работы с Prometheus"""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config):
         self.config = config
-        self.prom_url = config['prometheus']['url']
+        self.prom_url = config.prometheus.url
         self.prom = PrometheusConnect(url=self.prom_url)
         logger.info(f"Prometheus client initialized: {self.prom_url}")
     

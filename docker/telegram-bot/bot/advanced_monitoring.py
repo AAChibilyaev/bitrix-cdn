@@ -9,7 +9,7 @@ import logging
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
-from bot.types import (
+from models import (
     AppConfig, ContainerInfo, HealthCheckResult, AllMetrics,
     Alert, AlertSeverity, NotificationIssue
 )

@@ -1,20 +1,21 @@
-FROM python:3.12-alpine
+FROM python:3.12-slim
 
 # Установка системных зависимостей
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     curl \
     bash \
     tzdata \
     gcc \
-    musl-dev \
-    libffi-dev
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Установка рабочей директории
 WORKDIR /app
 
-# Копирование requirements и установка Python зависимостей
+# Копирование requirements и установка Python зависимостей с кешированием
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Копирование исходного кода
 COPY bot/ ./bot/
@@ -22,7 +23,7 @@ COPY config.yml .
 COPY mypy.ini .
 
 # Создание пользователя для безопасности
-RUN adduser -D -s /bin/bash telegram-bot
+RUN useradd -m -s /bin/bash telegram-bot
 RUN chown -R telegram-bot:telegram-bot /app
 
 # Проверка типов (опционально, можно отключить в продакшене)

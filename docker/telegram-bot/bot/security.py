@@ -11,7 +11,7 @@ import logging
 from typing import Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
 from enum import Enum
-from bot.types import AppConfig, UserId, ChatId
+from models import AppConfig, UserId, ChatId
 
 logger = logging.getLogger(__name__)
 

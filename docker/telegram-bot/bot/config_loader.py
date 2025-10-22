@@ -6,7 +6,7 @@
 import os
 import yaml
 from typing import Dict, Any, List
-from bot.types import (
+from models import (
     AppConfig, TelegramConfig, PrometheusConfig, DockerConfig,
     OpenAIConfig, AlertManagerConfig, NotificationConfig, ServiceConfig
 )

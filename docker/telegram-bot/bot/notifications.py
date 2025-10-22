@@ -6,9 +6,9 @@
 import asyncio
 import logging
 from typing import Set, Dict, Any, List
-from bot.prometheus_client import PrometheusClient
-from bot.docker_client import DockerClient
-from bot.alerts import AlertsClient
+from prometheus_client import PrometheusClient
+from docker_client import DockerClient
+from alerts import AlertsClient
 
 logger = logging.getLogger(__name__)
 

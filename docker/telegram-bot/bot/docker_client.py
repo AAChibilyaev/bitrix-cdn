@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 class DockerClient:
     """Клиент для работы с Docker API"""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config):
         self.config = config
-        self.docker_socket = config['docker']['socket']
+        self.docker_socket = config.docker.socket
         self.client = docker.from_env()
         logger.info(f"Docker client initialized: {self.docker_socket}")
     

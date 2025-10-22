@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent))
 
 from telegram.ext import Application, CommandHandler
-from bot.handlers import (
+from handlers import (
     start_command, help_command, status_command, nginx_command,
     redis_command, webp_command, prometheus_command, containers_command,
     health_command, cache_command, ssl_command, logs_command, metrics_command,
@@ -25,9 +25,9 @@ from bot.handlers import (
     compare_command, forecast_command, settings_command, help_advanced_command,
     init_clients, load_allowed_users
 )
-from bot.notifications import NotificationService
-from bot.config_loader import load_config, validate_config
-from bot.utils import setup_logging
+from notifications import NotificationService
+from config_loader import load_config, validate_config
+from utils import setup_logging
 
 # Настройка логирования
 logging.basicConfig(

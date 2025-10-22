@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 class AlertsClient:
     """Клиент для работы с AlertManager"""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config):
         self.config = config
-        self.alertmanager_url = config['alertmanager']['url']
+        self.alertmanager_url = config.alertmanager.url
         logger.info(f"Alerts client initialized: {self.alertmanager_url}")
     
     async def get_active_alerts(self) -> List[Dict[str, Any]]:
